@@ -1,0 +1,116 @@
+    if(s.active&&s.pid)c.out.push('   Main PID: '+s.pid+' ('+(s.proc||name)+')');c.out.push('');c.out.push(...(S.journal[name]||[]).slice(-6));return s.active?0:3;}
+  if(sub==='is-active'){c.out.push(s.active?'active':s.failed?'failed':'inactive');return s.active?0:3;}
+  if(sub==='is-enabled'){c.out.push(s.enabled===false?'disabled':'enabled');return 0;}
+  if(needRoot(c,'systemctl'))return 1;
+  if(sub==='start'||sub==='restart'||sub==='reload'){if(sub==='start'&&s.active)return 0;if(s.active){jlog(S,name,'systemd[1]','Stopping '+name+'.service...');}return startSvc(c,s,name);}
+  if(sub==='stop'){s.active=false;s.failed=false;s.pid=null;jlog(S,name,'systemd[1]','Stopped '+name+'.service.');return 0;}
+  if(sub==='enable'){s.enabled=true;c.out.push('Created symlink /etc/systemd/system/multi-user.target.wants/'+name+'.service.');return 0;}
+  if(sub==='disable'){s.enabled=false;c.out.push('Removed /etc/systemd/system/multi-user.target.wants/'+name+'.service.');return 0;}
+  c.err.push('Unknown command verb '+sub+'. Try status, start, stop, restart, enable, disable.');return 1;};
+CMDS.service=(c,a)=>CMDS.systemctl(c,[a[1],a[0]]);
+CMDS.journalctl=(c,a)=>{const o=pa(a,['u','n','p','since','priority']);const S=c.S;let L;
+  if(o.v.u){L=(S.journal[svcName(o.v.u)]||[]).slice();}else{L=[];for(const k in S.journal)L.push(...S.journal[k]);L.sort();}
+  const n=o.v.n!=null?parseInt(o.v.n,10):(o.f.has('e')?40:null);if(n)L=L.slice(-n);
+  if(!L.length){c.out.push('-- No entries --');return 0;}c.out.push(...L);if(o.f.has('f'))c.info.push('(journalctl -f follows live on a real system. The simulator shows current entries.)');};
+CMDS.nginx=(c,a)=>{if(!a.includes('-t')){c.info.push('Use nginx -t to test the configuration, and systemctl to start or restart the service.');return 1;}
+  if(!c.S.fs['/etc/nginx/nginx.conf']){c.err.push('nginx: command not found');return 127;}
+  const e=VALIDATORS.nginx(c.S);if(e){c.err.push('nginx: [emerg] '+e,'nginx: configuration file /etc/nginx/nginx.conf test failed');return 1;}
+  c.err.push('nginx: the configuration file /etc/nginx/nginx.conf syntax is ok','nginx: configuration file /etc/nginx/nginx.conf test is successful');return 0;};
+/* ----- network ----- */
+function parseHosts(S){const m={};const n=S.fs['/etc/hosts'];if(!n)return m;for(const l of n.c.split('\n')){const x=l.replace(/#.*/,'').trim().split(/\s+/);if(x.length<2)continue;for(const h of x.slice(1))if(!(h in m))m[h.toLowerCase()]=x[0];}return m;}
+function nameservers(S){const n=S.fs['/etc/resolv.conf'];if(!n)return [];return n.c.split('\n').map(l=>l.replace(/#.*/,'').trim().split(/\s+/)).filter(x=>x[0]==='nameserver'&&x[1]).map(x=>x[1]);}
+function isIp(h){return /^\d+\.\d+\.\d+\.\d+$/.test(h);}
+function dnsQuery(S,name,server){const N=S.net;name=name.toLowerCase().replace(/\.$/,'');const servers=server?[server]:nameservers(S);
+  if(!servers.length)return {err:'timeout'};for(const sv of servers){const z=N.dns[sv];if(!z)continue;const zone=z==='internal'?Object.assign({},N.pub,N.internal):N.pub;
+    return zone[name]?{ip:zone[name],server:sv,auth:z==='internal'&&!!N.internal[name]}:{err:'nx',server:sv};}
+  return {err:'timeout',server:servers[0]};}
+function resolveHost(S,h){h=h.toLowerCase();if(isIp(h))return {ip:h};const hm=parseHosts(S);if(hm[h])return {ip:hm[h],hosts:true};return dnsQuery(S,h);}
+function hostInfo(S,ip){if(ip==='127.0.0.1'||ip===S.net.myip)return {ping:true,local:true};return S.net.alive[ip]||null;}
+CMDS.ping=(c,a)=>{const o=pa(a,['c','W','i','w']);const h=o.pos[0];if(!h){c.err.push('ping: usage error: Destination address required');return 1;}
+  const cnt=Math.min(parseInt(o.v.c||'4',10)||4,10);const r=resolveHost(c.S,h);
+  if(!r.ip){c.err.push('ping: '+h+': '+(r.err==='timeout'?'Temporary failure in name resolution':'Name or service not known'));return 2;}
+  const hi=hostInfo(c.S,r.ip);c.out.push('PING '+h+' ('+r.ip+') 56(84) bytes of data.');
+  if(!hi||!hi.ping){for(let i=1;i<cnt;i++)c.out.push('From '+c.S.net.myip+' icmp_seq='+i+' Destination Host Unreachable');c.out.push('','--- '+h+' ping statistics ---',cnt+' packets transmitted, 0 received, +'+(cnt-1)+' errors, 100% packet loss, time '+(cnt*1000+60)+'ms');return 1;}
+  const base=hi.local?0.04:(hi.ms||0.6);const t=[];for(let i=1;i<=cnt;i++){const v=(base*(0.8+((i*37)%10)/25)).toFixed(base<1?3:1);t.push(+v);c.out.push('64 bytes from '+(isIp(h)?h:h+' ('+r.ip+')')+': icmp_seq='+i+' ttl='+(hi.ttl||64)+' time='+v+' ms');}
+  c.out.push('','--- '+h+' ping statistics ---',cnt+' packets transmitted, '+cnt+' received, 0% packet loss, time '+(cnt*1000-996)+'ms','rtt min/avg/max/mdev = '+Math.min(...t)+'/'+(t.reduce((x,y)=>x+y,0)/cnt).toFixed(base<1?3:1)+'/'+Math.max(...t)+'/0.071 ms');return 0;};
+CMDS.nslookup=(c,a)=>{const h=a.filter(x=>!x.startsWith('-'))[0];if(!h){c.err.push('usage: nslookup NAME [SERVER]');return 1;}const sv=a.filter(x=>!x.startsWith('-'))[1];
+  const r=dnsQuery(c.S,h,sv);if(r.err==='timeout'){c.out.push(';; connection timed out; no servers could be reached');return 1;}
+  c.out.push('Server:\t\t'+r.server,'Address:\t'+r.server+'#53','');
+  if(r.err==='nx'){c.out.push("** server can't find "+h+': NXDOMAIN');return 1;}
+  if(!r.auth)c.out.push('Non-authoritative answer:');c.out.push('Name:\t'+h,'Address: '+r.ip);c.info.push('Note: nslookup asks the DNS server directly. It does not read /etc/hosts, but ping, curl and browsers do.');return 0;};
+CMDS.host=(c,a)=>{const r=dnsQuery(c.S,a[0]||'');if(r.ip){c.out.push(a[0]+' has address '+r.ip);return 0;}c.out.push(r.err==='nx'?'Host '+a[0]+' not found: 3(NXDOMAIN)':';; connection timed out; no servers could be reached');return 1;};
+CMDS.dig=(c,a)=>{const sv=(a.find(x=>x.startsWith('@'))||'').slice(1)||undefined;const h=a.find(x=>!x.startsWith('@')&&!x.startsWith('+')&&!x.startsWith('-'));const r=dnsQuery(c.S,h||'',sv);
+  if(a.includes('+short')){if(r.ip)c.out.push(r.ip);return r.ip?0:1;}
+  if(r.err==='timeout'){c.out.push(';; communications error: timed out','; no servers could be reached');return 9;}
+  c.out.push(';; HEADER status: '+(r.ip?'NOERROR':'NXDOMAIN'),'',';; ANSWER SECTION:');if(r.ip)c.out.push(h+'.\t\t300\tIN\tA\t'+r.ip);c.out.push('',';; SERVER: '+r.server+'#53('+r.server+') (UDP)');return 0;};
+CMDS.curl=(c,a)=>{const o=pa(a,['o','m','X','H','d','w','A']);const url=o.pos[0];if(!url){c.err.push("curl: try 'curl http://ehr.westside.local' or 'curl -I URL' for headers only");return 2;}
+  const m=url.match(/^(?:(https?):\/\/)?([^\/:]+)(?::(\d+))?(\/.*)?$/);if(!m){c.err.push('curl: (3) URL rejected: Malformed input to a URL function');return 3;}
+  const host=m[2],port=m[3]||(m[1]==='https'?'443':'80');const r=resolveHost(c.S,host);
+  if(!r.ip){c.err.push('curl: (6) Could not resolve host: '+host);return 6;}
+  const hi=hostInfo(c.S,r.ip);let page=null;
+  if(hi&&hi.local){for(const k in c.S.services){const s=c.S.services[k];if(s.active&&s.page&&(s.ports||[]).includes(+port))page=s.page;}if(!page){c.err.push('curl: (7) Failed to connect to '+host+' port '+port+' after 0 ms: Couldn\'t connect to server');return 7;}}
+  else if(!hi){c.err.push('curl: (28) Failed to connect to '+host+' port '+port+' after 3002 ms: No route to host');return 28;}
+  else if(!hi.http){c.err.push('curl: (7) Failed to connect to '+host+' port '+port+' after 2 ms: Couldn\'t connect to server');return 7;}
+  else page=hi.http;
+  if(o.f.has('I'))c.out.push('HTTP/1.1 200 OK','Server: nginx','Content-Type: text/html; charset=utf-8','Connection: keep-alive');else c.out.push(...linesOf(page));return 0;};
+CMDS.wget=(c,a)=>{c.info.push('wget is not in this simulator. Use curl URL instead.');return 1;};
+CMDS.ip=(c,a)=>{const N=c.S.net;if(a[0]&&/^r/.test(a[0])){c.out.push('default via '+N.gw+' dev eth0 proto dhcp metric 100',N.myip.replace(/\.\d+$/,'.0')+'/24 dev eth0 proto kernel scope link src '+N.myip);return 0;}
+  c.out.push('1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 state UNKNOWN','    inet 127.0.0.1/8 scope host lo','2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP','    link/ether 52:54:00:3a:91:0c brd ff:ff:ff:ff:ff:ff','    inet '+N.myip+'/24 brd '+N.myip.replace(/\.\d+$/,'.255')+' scope global eth0');};
+CMDS.ifconfig=(c,a)=>CMDS.ip(c,['a']);
+CMDS.hostname=c=>{c.out.push(c.S.host);};
+function listeners(S){const r=[];for(const k in S.services){const s=S.services[k];if(s.active)(s.ports||[]).forEach(p=>r.push({addr:'0.0.0.0:'+p,proc:s.proc||k,pid:s.pid||800}));}
+  S.procs.forEach(p=>{if(p.listen)r.push({addr:p.listen,proc:p.name||p.cmd.split(/[\s/]/).filter(Boolean).pop(),pid:p.pid});});return r;}
+CMDS.ss=(c,a)=>{const showP=a.join('').includes('p');c.out.push('State   Recv-Q  Send-Q   Local Address:Port    Peer Address:Port  '+(showP?'Process':''));
+  listeners(c.S).forEach(l=>c.out.push('LISTEN  0       511    '+l.addr.padStart(17)+'          0.0.0.0:*     '+(showP?'users:(("'+l.proc+'",pid='+l.pid+',fd=6))':'')));
+  if(showP&&c.user!=='root')c.info.push('Tip: on a real server, sudo ss -tlnp is needed to see process names for sockets owned by root.');};
+CMDS.netstat=CMDS.ss;
+/* ----- processes ----- */
+CMDS.ps=(c,a)=>{const S=c.S;const ef=a.join(' ').includes('e')&&a.join(' ').includes('f')&&!a.join('').includes('aux');
+  if(!a.length){c.out.push('    PID TTY          TIME CMD','   1402 pts/0    00:00:00 bash','   '+(9000+S.tick)+' pts/0    00:00:00 ps');return 0;}
+  if(ef){c.out.push('UID          PID    PPID  C STIME TTY          TIME CMD');S.procs.forEach(p=>c.out.push(p.user.padEnd(8)+String(p.pid).padStart(8)+String(p.ppid||1).padStart(8)+String(Math.round(p.cpu)).padStart(3)+' '+(p.start||'08:00')+' '+(p.tty||'?').padEnd(12)+' '+(p.time||'00:00:01')+' '+p.cmd));return 0;}
+  c.out.push('USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND');
+  S.procs.forEach(p=>c.out.push(p.user.padEnd(10)+String(p.pid).padStart(5)+String(p.cpu.toFixed(1)).padStart(5)+String(p.mem.toFixed(1)).padStart(5)+String(p.vsz||16800).padStart(7)+String(p.rss||5200).padStart(6)+' '+(p.tty||'?').padEnd(8)+' '+(p.stat||'Ss').padEnd(4)+' '+(p.start||'08:00')+'   '+(p.time||'0:01')+' '+p.cmd));
+  c.out.push('ricardo   '+String(9000+S.tick).padStart(5)+'  0.0  0.1  11500  3300 pts/0    R+   14:21   0:00 ps aux');};
+CMDS.top=(c,a)=>{const L=c.S.procs.slice().sort((x,y)=>y.cpu-x.cpu).slice(0,8);const load=L.reduce((s,p)=>s+p.cpu,0)/100;
+  c.out.push('top - 14:21:07 up 6 days,  3:12,  1 user,  load average: '+load.toFixed(2)+', '+load.toFixed(2)+', '+(load*0.9).toFixed(2),'','    PID USER      %CPU %MEM COMMAND');L.forEach(p=>c.out.push(String(p.pid).padStart(7)+' '+p.user.padEnd(9)+String(p.cpu.toFixed(1)).padStart(5)+String(p.mem.toFixed(1)).padStart(5)+' '+p.cmd.split(' ')[0]));
+  c.info.push('(top is live and interactive on a real system. This is a one-time snapshot.)');};
+function killPid(c,pid){const S=c.S;const i=S.procs.findIndex(p=>p.pid===pid);if(i<0){c.err.push('bash: kill: ('+pid+') - No such process');return 1;}
+  const p=S.procs[i];if(c.user!=='root'&&p.user!==c.user){c.err.push('bash: kill: ('+pid+') - Operation not permitted');tip(c);return 1;}
+  if(p.protect){c.err.push('bash: kill: ('+pid+') - the simulator will not kill '+p.cmd.split(' ')[0]+' (it would break the lab). Pick the suspicious process.');return 1;}
+  S.procs.splice(i,1);S.killed=(S.killed||[]).concat([p.cmd]);S.sinceKill=0;return 0;}
+CMDS.kill=(c,a)=>{const pids=[];for(let i=0;i<a.length;i++){const x=a[i];if(x==='-s'||x==='-n'){i++;continue;}if(x.startsWith('-'))continue;pids.push(x);}
+  if(!pids.length){c.err.push('kill: usage: kill [-9] PID');return 2;}let code=0;for(const x of pids){if(!/^\d+$/.test(x)){c.err.push('bash: kill: '+x+': arguments must be process or job IDs');code=1;continue;}if(killPid(c,+x))code=1;}return code;};
+CMDS.pkill=(c,a)=>{const n=a.filter(x=>!x.startsWith('-'))[0];if(!n){c.err.push('usage: pkill NAME');return 2;}const m=c.S.procs.filter(p=>p.cmd.includes(n)&&!p.protect);if(!m.length)return 1;let code=0;m.forEach(p=>{if(killPid(c,p.pid))code=1;});return code;};
+CMDS.killall=CMDS.pkill;
+/* ----- cron ----- */
+CMDS.crontab=(c,a)=>{const o=pa(a,['u']);const S=c.S;const t=o.v.u||c.user;
+  if(o.v.u&&c.user!=='root'&&o.v.u!==c.user){c.err.push('crontab: must be privileged to use -u');tip(c);return 1;}
+  if(o.f.has('l')){const t2=S.crontabs[t];if(t2==null){c.err.push('no crontab for '+t);return 1;}c.out.push(...linesOf(t2));return 0;}
+  if(o.f.has('r')){if(S.crontabs[t]==null){c.err.push('no crontab for '+t);return 1;}delete S.crontabs[t];return 0;}
+  if(o.f.has('e')){c.res.action={type:'edit',crontab:t,path:'crontab for '+t,content:S.crontabs[t]||'# m h dom mon dow command\n'};return 0;}
+  c.err.push('usage: crontab [-u USER] -l | -e | -r');return 1;};
+/* ----- editor ----- */
+function editCmd(c,a,name){const f=a.filter(x=>!x.startsWith('-'))[0];if(!f){c.err.push('usage: edit FILE');return 1;}const p=P(c,f),n=node(c.S,p);
+  if(n&&n.t==='d'){c.err.push(name+': '+f+' is a directory');return 1;}
+  if(n&&!can(c.S,c.user,p,4)){return denied(c,name+': '+f+': Permission denied');}
+  if(n&&!can(c.S,c.user,p,2)||!n&&!canCreate(c.S,c.user,p)){c.err.push(name+': '+f+': Permission denied (you can read it but not save it)');tip(c,'Tip: config files belong to root. Open it with sudo edit '+f);return 1;}
+  if(n&&n.sz>MB){c.err.push(name+': '+f+' is too large to open in an editor ('+human(n.sz)+').');return 1;}
+  if(name!=='edit')c.info.push('('+name+' opens the simple editor in this simulator.)');
+  c.res.action={type:'edit',path:p,user:c.user,content:n?n.c:''};return 0;}
+['edit','nano','vi','vim'].forEach(k=>CMDS[k]=(c,a)=>editCmd(c,a,k));
+function saveEdit(S,act,text){if(text&&!text.endsWith('\n'))text+='\n';
+  if(act.crontab){S.crontabs[act.crontab]=text;return 'crontab: installing new crontab';}
+  const e=writeFile(S,act.user,act.path,text,false);return e?'edit: '+e:'Saved '+act.path;}
+/* ----- disk ----- */
+function diskUsed(S){let u=S.disk.base;for(const k in S.fs){const n=S.fs[k];if(n.t==='f'&&n.sz!=null)u+=n.sz;}return u;}
+CMDS.df=(c,a)=>{const h=a.join('').includes('h');const S=c.S;const T=S.disk.total,U=diskUsed(S),A=Math.max(T-U,0);const pct=Math.ceil(U/T*100)+'%';
+  const f=v=>h?human(v):String(Math.round(v/1024));
+  c.out.push('Filesystem      '+(h?'Size':'1K-blocks').padStart(h?5:10)+(h?'  Used':'      Used')+(h?' Avail':'     Avail')+' Use% Mounted on');
+  c.out.push('/dev/sda1       '+f(T).padStart(h?5:10)+' '+f(U).padStart(h?5:9)+' '+f(A).padStart(h?5:9)+' '+pct.padStart(4)+' /');
+  c.out.push('tmpfs           '+f(1.9*GB).padStart(h?5:10)+' '+(h?'0':'0').padStart(h?5:9)+' '+f(1.9*GB).padStart(h?5:9)+'   0% /dev/shm');
+  c.out.push('/dev/sda15      '+f(105*MB).padStart(h?5:10)+' '+f(6.1*MB).padStart(h?5:9)+' '+f(99*MB).padStart(h?5:9)+'   6% /boot/efi');};
+function walk(c,start,fn,maxd){/* returns list of paths in order, reports unreadable dirs */const S=c.S;const out=[];
+  const rec=(p,d)=>{const n=S.fs[p];out.push({p,d});if(n.t!=='d')return;if(c.user!=='root'&&!can(S,c.user,p,5)){fn&&fn(p);return;}if(maxd!=null&&d>=maxd)return;children(S,p).forEach(x=>rec(J(p,x),d+1));};
+  rec(start,0);return out;}
+function treeSize(c,p){let t=0;const S=c.S;const rec=q=>{const n=S.fs[q];t+=n.t==='f'?Math.ceil(fsize(n)/4096)*4096:4096;if(n.t==='d'&&(c.user==='root'||can(S,c.user,q,5)))children(S,q).forEach(x=>rec(J(q,x)));};rec(p);return t;}
+CMDS.du=(c,a)=>{const o=pa(a,['d','max-depth']);const h=o.f.has('h'),s=o.f.has('s');const md=o.v.d!=null?+o.v.d:o.v['max-depth']!=null?+o.v['max-depth']:null;
