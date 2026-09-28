@@ -1,0 +1,90 @@
+  'Force a new password at next login with <code>sudo chage -d 0 jlopez</code>, then confirm with <code>sudo chage -l jlopez</code>.'],
+ check(S){const p=[],U=S.users.jlopez;if(!U)return {problems:['The account jlopez no longer exists. Press Reset and try again.']};
+  if(U.fails.length>=S.deny)p.push('jlopez still has '+U.fails.length+' failed attempts recorded by faillock, so the login is still blocked. (passwd -u does not clear this counter.)');
+  if(U.locked)p.push('jlopez has a locked password (passwd -S shows L). Unlock it with sudo passwd -u jlopez.');
+  if(!U.mustChange)p.push('jlopez is not required to change her password at next login. Use sudo chage -d 0 jlopez. If you ran passwd after chage, run chage again, because setting a password clears that flag.');
+  if(S.users.mkim&&!S.users.mkim.fails.length)p.push('Note: you also reset mkim\'s failure history. It is harmless here, but only touch the account in the ticket.');
+  return {problems:p.filter(x=>!x.startsWith('Note')),notes:p.filter(x=>x.startsWith('Note'))};},
+ resume:'Hands-on lab (simulated Ubuntu server): resolved an account lockout ticket by reviewing failed logins in auth.log, clearing the pam_faillock tally, and enforcing a password change at next login with chage.',
+ learned:`<p><b>faillock</b> counts failed logins. After too many (here 5), PAM blocks the account for a while. <code>faillock --user NAME --reset</code> clears it.</p><p><b>passwd -l / -u</b> lock and unlock the password itself (an exclamation mark in /etc/shadow). It is a different lock, so knowing which one you face saves time.</p><p><b>chage -d 0</b> sets "last password change" to the start of time, so the user must pick a new password at next login. Always verify identity before unlocking, and document what you did in the ticket.</p>`,
+ solve:['grep jlopez /var/log/auth.log','sudo faillock --user jlopez','sudo faillock --user jlopez --reset','sudo chage -d 0 jlopez','sudo chage -l jlopez']});
+/* ---------- Lab 2: onboarding ---------- */
+LABS.push({id:2,tid:'WFC-1042',cat:'hd',pri:'P3',title:'New hire onboarding',summary:'Create an account for a new nurse, with the right groups and a private home folder.',host:'wfc-app01',
+ requester:'Priya Shah, HR',
+ setup(){const S=baseState(this.host);Object.assign(S.groups,{nurses:1101,scheduling:1102,frontdesk:1103,billing:1104});
+  addUser(S,'jlopez',1001,{gecos:'Jenna Lopez',groups:['frontdesk','scheduling']});addUser(S,'aperez',1002,{gecos:'Ana Perez',groups:['nurses','scheduling']});
+  mkf(S,'/home/ricardo/onboarding-form.txt','WESTSIDE FAMILY CLINIC - NEW HIRE IT REQUEST\nName:        David Nguyen\nRole:        Registered Nurse\nStart date:  Monday Sep 28 2026\nUsername:    dnguyen\nGroups:      nurses, scheduling\nShell:       /bin/bash\nNotes:       Home folder must be private (only David can read it).\n             Give him a temporary password and require a change at first login.\n',{o:'ricardo'});return S;},
+ brief:`<p><b>Ticket WFC-1042</b> from Priya Shah (HR), priority P3.</p><p>"David Nguyen starts Monday as a Registered Nurse. Please set up his Linux account on wfc-app01 so he can use the charting tools. The request form is in your home folder."</p>
+<p>Requirements (also in <code>~/onboarding-form.txt</code>):</p><ul><li>Username <code>dnguyen</code>, full name David Nguyen, shell <code>/bin/bash</code></li><li>Home folder <code>/home/dnguyen</code> that only he can access (permissions 700)</li><li>Member of groups <code>nurses</code> and <code>scheduling</code>, and nothing extra</li><li>Temporary password set, and he must change it at first login</li></ul>`,
+ hints:['Read the form with <code>cat ~/onboarding-form.txt</code>. Check how an existing nurse is set up with <code>id aperez</code>.',
+  '<code>useradd</code> creates users. <code>-m</code> makes the home folder, <code>-s</code> sets the shell, <code>-c</code> the full name, <code>-G</code> extra groups (comma separated, no spaces).',
+  'Try <code>sudo useradd -m -s /bin/bash -c "David Nguyen" -G nurses,scheduling dnguyen</code>, then <code>ls -ld /home/dnguyen</code>. The default is 755, which lets everyone look inside.',
+  'Finish with <code>sudo chmod 700 /home/dnguyen</code>, <code>sudo passwd dnguyen</code>, then <code>sudo chage -d 0 dnguyen</code> (in that order).'],
+ check(S){const p=[],u=S.users.dnguyen;if(!u)return {problems:['User dnguyen does not exist yet. Create it with useradd.']};
+  const h=S.fs['/home/dnguyen'];const g=userGroups(S,'dnguyen');
+  if(!h)p.push('/home/dnguyen does not exist. Use useradd -m, or create it with mkdir and give it to dnguyen with chown.');
+  else{if(h.o!=='dnguyen')p.push('/home/dnguyen is owned by '+h.o+', it should be owned by dnguyen.');if((h.m&0o777)!==0o700)p.push('/home/dnguyen has permissions '+octal(h.m&0o777)+'. Policy says 700 (only David). Use sudo chmod 700 /home/dnguyen.');}
+  ['nurses','scheduling'].forEach(x=>{if(!g.includes(x))p.push('dnguyen is not in the '+x+' group. Use sudo usermod -aG '+x+' dnguyen.');});
+  const extra=g.filter(x=>x!=='dnguyen'&&x!==u.pg&&!['nurses','scheduling'].includes(x));if(extra.length)p.push('dnguyen is in extra group(s): '+extra.join(', ')+'. Least privilege means only what the form asks for.');
+  if(u.shell!=='/bin/bash')p.push('Login shell is '+u.shell+'. The form asks for /bin/bash (sudo usermod -s /bin/bash dnguyen).');
+  if(!u.pw)p.push('dnguyen has no password yet. Set a temporary one with sudo passwd dnguyen.');
+  if(!u.mustChange)p.push('dnguyen is not forced to change the password at first login. Run sudo chage -d 0 dnguyen (after passwd).');
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Ubuntu server): onboarded a new user from an HR request by creating the account with useradd, assigning least-privilege groups, securing the home directory (700), and enforcing a first-login password change.',
+ learned:`<p><b>useradd -m -s -c -G</b> builds an account in one line. Without <code>-m</code> there is no home folder, a classic onboarding mistake.</p><p><b>usermod -aG</b> adds groups. Leaving out <code>-a</code> replaces all groups, which can silently remove access.</p><p><b>chmod 700</b> on a home folder means only the owner can read, write or enter it. In a clinic this protects anything a user saves.</p><p>Order matters: <code>passwd</code> then <code>chage -d 0</code>, because setting a password clears the force-change flag.</p>`,
+ solve:['cat ~/onboarding-form.txt','sudo useradd -m -s /bin/bash -c "David Nguyen" -G nurses,scheduling dnguyen','sudo chmod 700 /home/dnguyen','sudo passwd dnguyen','sudo chage -d 0 dnguyen','id dnguyen','ls -ld /home/dnguyen']});
+/* ---------- Lab 3: shared folder ---------- */
+LABS.push({id:3,tid:'WFC-1043',cat:'hd',pri:'P2',title:'Permission denied on shared folder',summary:'The billing team cannot open their shared folder.',host:'wfc-files01',
+ requester:'Maria Santos, Billing',
+ setup(){const S=baseState(this.host);Object.assign(S.groups,{nurses:1101,frontdesk:1103,billing:1104});
+  addUser(S,'maria',1001,{gecos:'Maria Santos'});addUser(S,'tchen',1002,{gecos:'Tom Chen',groups:['billing']});addUser(S,'jlopez',1003,{gecos:'Jenna Lopez',groups:['frontdesk']});
+  mkd(S,'/srv/shared');mkd(S,'/srv/shared/frontdesk',{g:'frontdesk',m:0o2770});mkf(S,'/srv/shared/frontdesk/phone-list.txt','Front desk extensions\n',{g:'frontdesk',m:0o660});
+  mkd(S,'/srv/shared/billing',{m:0o700});
+  mkf(S,'/srv/shared/billing/claims-queue.csv','claim_id,patient_id,payer,status\n88121,P-2231,BlueCross,pending\n',{m:0o660});
+  mkf(S,'/srv/shared/billing/invoices-2026-09.xlsx','(spreadsheet)',{m:0o660,sz:48213});
+  mkf(S,'/srv/shared/billing/README.txt','Billing team shared folder. Contains PHI. Billing group only.\n',{m:0o640});
+  mkf(S,'/var/log/syslog',S.fs['/var/log/syslog'].c+'Sep 27 09:02:40 wfc-files01 smbd[2290]: maria: access denied to /srv/shared/billing\n',{o:'syslog',g:'adm',m:0o640});return S;},
+ brief:`<p><b>Ticket WFC-1043</b> from Maria Santos (Billing), priority P2.</p><p>"Since the file server was rebuilt last night, I get Permission denied when I open the billing shared folder. Tom says the same. We need the claims queue today."</p>
+<p>Goal on <code>wfc-files01</code>:</p><ul><li><code>/srv/shared/billing</code> and everything in it belong to group <code>billing</code></li><li>The billing group can read and write there (and enter the folder)</li><li>Other users get no access at all (the folder contains patient billing data)</li><li>Maria (<code>maria</code>) and Tom (<code>tchen</code>) are both in the billing group</li></ul>
+<p class="muted">Tip: <code>/srv/shared/frontdesk</code> is set up correctly. Compare with it.</p>`,
+ hints:['Look at owners and permissions with <code>ls -l /srv/shared</code> and <code>ls -l /srv/shared/billing</code> (you may need sudo for the second).',
+  'Check group membership with <code>groups maria</code> and <code>groups tchen</code>. Is Maria in billing?',
+  'Give the folder and its files to the billing group: <code>sudo chown -R root:billing /srv/shared/billing</code>. Then set folder permissions like frontdesk: <code>sudo chmod 2770 /srv/shared/billing</code> (the 2 keeps new files in the group).',
+  'Add Maria: <code>sudo usermod -aG billing maria</code>. Test as her with <code>sudo -u maria ls -l /srv/shared/billing</code>.'],
+ check(S){const p=[],d=S.fs['/srv/shared/billing'];if(!d)return {problems:['/srv/shared/billing was deleted! Press Reset. Never delete data to fix a permission problem.']};
+  if(d.g!=='billing')p.push('The folder /srv/shared/billing belongs to group '+d.g+', not billing (use chown root:billing or chgrp billing).');
+  if(((d.m>>3)&7)!==7)p.push('The billing group does not have full rwx on the folder (group part of '+octal(d.m)+' should be 7).');
+  if((d.m&7)!==0)p.push('Other users still have access to the folder (last digit of '+octal(d.m)+' should be 0). It contains PHI.');
+  const files=descendants(S,'/srv/shared/billing').filter(k=>S.fs[k].t==='f');const lost=['claims-queue.csv','invoices-2026-09.xlsx','README.txt'].filter(f=>!S.fs['/srv/shared/billing/'+f]);
+  if(lost.length)p.push('Files were deleted: '+lost.join(', ')+'. Press Reset and fix permissions without removing data.');
+  const wrongG=files.filter(k=>S.fs[k].g!=='billing');if(wrongG.length)p.push('These files are not in group billing yet: '+wrongG.map(baseName).join(', ')+'. Use chown -R (the R means recursive).');
+  const noRW=files.filter(k=>((S.fs[k].m>>3)&6)!==6&&baseName(k)!=='README.txt');if(noRW.length)p.push('The billing group cannot write these files: '+noRW.map(baseName).join(', ')+'.');
+  const openF=files.filter(k=>(S.fs[k].m&4));if(openF.length&&(d.m&7))p.push('Files are world readable: '+openF.map(baseName).join(', ')+'.');
+  ['maria','tchen'].forEach(u=>{if(!S.users[u]||!userGroups(S,u).includes('billing'))p.push(u+' is not in the billing group (sudo usermod -aG billing '+u+').');});
+  if(S.users.jlopez&&userGroups(S,'jlopez').includes('billing'))p.push('jlopez (front desk) was added to billing. Remove her, least privilege.');
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Linux file server): fixed a "Permission denied" ticket on a shared folder containing PHI using chown -R, chmod 2770 (setgid) and usermod -aG, then verified access as the affected user with sudo -u.',
+ learned:`<p>Linux permissions are three sets of <b>rwx</b>: owner, group, others. As numbers r=4, w=2, x=1, so 770 means owner and group get everything and others nothing.</p><p>On a folder, <b>x</b> means "may enter" and <b>r</b> means "may list". You need both to open files inside.</p><p><b>chown -R user:group</b> changes owner and group for a folder and everything inside. The leading <b>2</b> in 2770 is setgid, so new files inherit the folder's group.</p><p>Group changes apply at the next login, so users may need to sign out and back in. Testing with <code>sudo -u USER</code> proves the fix before you close the ticket.</p>`,
+ solve:['ls -l /srv/shared','sudo ls -l /srv/shared/billing','groups maria','sudo chown -R root:billing /srv/shared/billing','sudo chmod 2770 /srv/shared/billing','sudo usermod -aG billing maria','sudo -u maria ls -l /srv/shared/billing']});
+/* ---------- Lab 4: disk full ---------- */
+LABS.push({id:4,tid:'WFC-1044',cat:'hd',pri:'P1',title:'Disk full on intranet server',summary:'Uploads fail with "No space left on device".',host:'wfc-web01',
+ requester:'Dr. Alvarez, Clinical Lead',
+ setup(){const S=baseState(this.host);S.disk.base=9.1*GB;
+  mkd(S,'/var/log/app',{m:0o750});mkd(S,'/var/lib/clinic',{m:0o750});mkd(S,'/etc/clinic-portal');mkd(S,'/var/www/portal',{o:'www-data'});mkd(S,'/var/www/portal/uploads',{o:'www-data'});
+  mkf(S,'/var/log/app/portal-debug.log','2026-09-27 09:13:59 DEBUG request id=88213 headers={...}\n2026-09-27 09:13:59 DEBUG sql SELECT * FROM appointments WHERE ...\n2026-09-27 09:14:00 DEBUG cache miss key=sched:2026-09-28\n',{sz:Math.round(36.4*GB)});
+  mkf(S,'/var/log/app/portal.log','2026-09-27 09:14:02 ERROR upload failed: [Errno 28] No space left on device\n',{sz:118*MB});
+  mkf(S,'/var/log/app/portal.log.1','2026-09-26 23:59:59 INFO rotated\n',{sz:84*MB});
+  mkf(S,'/var/lib/clinic/records.db','(database)',{sz:Math.round(2.1*GB),m:0o640});
+  mkf(S,'/var/backups/records-2026-09-26.tar.gz','(backup archive)',{sz:Math.round(1.7*GB),m:0o600});
+  mkf(S,'/etc/clinic-portal/portal.conf','# Westside patient portal settings\nlisten_port = 8080\nupload_dir = /var/www/portal/uploads\nlog_file = /var/log/app/portal.log\n# TEMP for vendor troubleshooting (ticket WFC-0977). Set back to info when done!\nlog_level = debug\ndebug_log_file = /var/log/app/portal-debug.log\n');
+  S.services['clinic-portal']={desc:'Westside Patient Portal',active:true,proc:'python3',pid:1203,ports:[8080]};
+  S.journal['clinic-portal']=['Sep 27 09:14:02 wfc-web01 clinic-portal[1203]: ERROR upload failed: [Errno 28] No space left on device'];
+  S.procs.push({pid:1203,user:'www-data',cpu:3.1,mem:4.2,cmd:'python3 /opt/clinic-portal/app.py --config /etc/clinic-portal/portal.conf'});
+  mkd(S,'/opt/clinic-portal');mkf(S,'/opt/clinic-portal/app.py','# portal app\n',{sz:24*KB});return S;},
+ brief:`<p><b>Ticket WFC-1044</b> from Dr. Alvarez, priority P1.</p><p>"Nobody can upload scanned referrals to the patient portal. The error says No space left on device."</p>
+<p>Goal on <code>wfc-web01</code>:</p><ul><li>Find what is filling the disk and free space so the root filesystem is under 80% used</li><li>The portal vendor confirmed the <b>debug</b> log can be deleted. Never delete the patient database (<code>/var/lib/clinic</code>) or backups</li><li>Stop it from happening again: debug logging was left on in the portal config</li></ul>`,
+ hints:['Confirm the problem with <code>df -h</code>. Look at the Use% column for <code>/</code>.',
+  'Find the big folder step by step: <code>sudo du -sh /var/*</code>, then go deeper, for example <code>sudo du -sh /var/log/*</code>. Or search: <code>sudo find / -size +1G</code>.',
+  'The culprit is <code>/var/log/app/portal-debug.log</code>. Remove it with <code>sudo rm /var/log/app/portal-debug.log</code> and check <code>df -h</code> again.',
+  'Open the config with <code>sudo edit /etc/clinic-portal/portal.conf</code> and change <code>log_level = debug</code> to <code>log_level = info</code>. Save.'],
+ check(S){const p=[];const pct=Math.ceil(diskUsed(S)/S.disk.total*100);
