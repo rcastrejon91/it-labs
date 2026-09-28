@@ -1,0 +1,81 @@
+  if(!S.fs['/var/lib/clinic/records.db'])p.push('You deleted /var/lib/clinic/records.db, the patient records database! In real life that is a major incident. Press Reset and try again.');
+  if(!S.fs['/var/backups/records-2026-09-26.tar.gz'])p.push('You deleted last night\'s backup. Backups are not safe to remove to free space. Press Reset.');
+  if(!S.fs['/var/log/app/portal.log'])p.push('portal.log is the live application log and should be kept (only the debug log was approved for deletion).');
+  if(pct>=80)p.push('The root filesystem is still '+pct+'% full. Find the largest file with du or find and remove the approved one.');
+  const cf=S.fs['/etc/clinic-portal/portal.conf'];if(!cf)p.push('/etc/clinic-portal/portal.conf is missing. Press Reset.');
+  else{const m=cf.c.match(/^\s*log_level\s*=\s*(\S+)/m);if(!m)p.push('portal.conf has no log_level line anymore. Add log_level = info.');else if(m[1].toLowerCase()==='debug')p.push('log_level is still debug in /etc/clinic-portal/portal.conf, so the disk will fill up again. Change it to info.');}
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Ubuntu server): resolved a P1 "disk full" outage by tracing usage with df, du and find, safely removing a 36 GB runaway debug log while protecting the database and backups, and fixing the root cause in the app config.',
+ learned:`<p><b>df -h</b> shows how full each filesystem is. <b>du -sh</b> shows how big a folder is, so you drill down folder by folder. <b>find / -size +1G</b> jumps straight to huge files.</p><p>Always ask what is safe to delete. Logs usually are, databases and backups are not.</p><p>Fix the root cause (here debug logging) or the ticket comes back next week.</p><p>Pro tip: if a running program still holds a deleted file open, the space is not freed until that program restarts (<code>systemctl restart</code>). On real servers, <code>truncate -s 0 FILE</code> avoids that.</p>`,
+ solve:['df -h','sudo du -sh /var/*','sudo du -sh /var/log/*','sudo find / -size +1G','sudo rm /var/log/app/portal-debug.log','df -h',{edit:'sudo edit /etc/clinic-portal/portal.conf',find:'log_level = debug',replace:'log_level = info'}]});
+/* ---------- Lab 5: service won't start ---------- */
+const NGX_MAIN='user www-data;\nworker_processes auto;\npid /run/nginx.pid;\n\nevents {\n    worker_connections 768;\n}\n\nhttp {\n    sendfile on;\n    include /etc/nginx/mime.types;\n    default_type application/octet-stream;\n    access_log /var/log/nginx/access.log;\n    error_log /var/log/nginx/error.log;\n    include /etc/nginx/sites-enabled/*;\n}\n';
+const NGX_SITE='# Patient portal (edited by vendor 09-26)\nserver {\n    listen 80;\n    server_nme portal.westside.local;\n    root /var/www/portal;\n    index index.html;\n\n    location / {\n        try_files $uri $uri/ =404;\n    }\n}\n';
+LABS.push({id:5,tid:'WFC-1045',cat:'hd',pri:'P1',title:'Patient portal web service down',summary:'nginx will not start after a vendor change.',host:'wfc-web01',
+ requester:'Operations Manager',
+ setup(){const S=baseState(this.host);mkd(S,'/etc/nginx');mkd(S,'/etc/nginx/sites-enabled');mkd(S,'/var/log/nginx',{o:'www-data',g:'adm'});mkd(S,'/var/www/portal',{o:'www-data'});
+  mkf(S,'/etc/nginx/nginx.conf',NGX_MAIN);mkf(S,'/etc/nginx/mime.types','types { text/html html; }\n');mkf(S,'/etc/nginx/sites-enabled/portal.conf',NGX_SITE);
+  mkf(S,'/var/www/portal/index.html',PORTAL_HTML,{o:'www-data'});
+  mkf(S,'/var/log/nginx/error.log','2026/09/27 08:02:11 [emerg] 1180#1180: unknown directive "server_nme" in /etc/nginx/sites-enabled/portal.conf:4\n',{o:'www-data',g:'adm',m:0o640});
+  S.services.nginx={desc:'A high performance web server and a reverse proxy server',active:false,failed:true,validate:'nginx',ports:[80],proc:'nginx',page:PORTAL_HTML,since:'08:02:11'};
+  const h=this.host;S.journal.nginx=['Sep 27 08:02:11 '+h+' systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...','Sep 27 08:02:11 '+h+' nginx[1180]: nginx: [emerg] unknown directive "server_nme" in /etc/nginx/sites-enabled/portal.conf:4','Sep 27 08:02:11 '+h+' nginx[1180]: nginx: configuration file /etc/nginx/nginx.conf test failed','Sep 27 08:02:11 '+h+' systemd[1]: nginx.service: Control process exited, code=exited, status=1/FAILURE','Sep 27 08:02:11 '+h+" systemd[1]: nginx.service: Failed with result 'exit-code'.",'Sep 27 08:02:11 '+h+' systemd[1]: Failed to start nginx.service - A high performance web server and a reverse proxy server.'];
+  return S;},
+ brief:`<p><b>Ticket WFC-1045</b> from the Operations Manager, priority P1.</p><p>"The patient portal has been down since this morning. The vendor changed something yesterday afternoon. Patients are calling!"</p>
+<p>Goal on <code>wfc-web01</code>:</p><ul><li>Find out why the <code>nginx</code> service will not start</li><li>Fix the configuration mistake (do not delete the site config)</li><li>Get nginx running and confirm the portal answers locally</li></ul>`,
+ hints:['Ask systemd first: <code>systemctl status nginx</code>. Is it active or failed?',
+  'Read the service log: <code>journalctl -u nginx</code>. The [emerg] line names the file and line number.',
+  'Test the config any time with <code>sudo nginx -t</code>. The problem is a typo on line 4 of <code>/etc/nginx/sites-enabled/portal.conf</code>. Open it with <code>sudo edit /etc/nginx/sites-enabled/portal.conf</code>.',
+  'Fix <code>server_nme</code> to <code>server_name</code>, save, run <code>sudo nginx -t</code>, then <code>sudo systemctl restart nginx</code> and <code>curl http://localhost</code>.'],
+ check(S){const p=[];const f=S.fs['/etc/nginx/sites-enabled/portal.conf'];
+  if(!f)p.push('/etc/nginx/sites-enabled/portal.conf is gone. The portal site needs it. Press Reset and edit the file instead.');
+  else if(!/^\s*server_name\s+portal\.westside\.local\s*;/m.test(f.c))p.push('portal.conf should contain the line: server_name portal.westside.local;');
+  const e=VALIDATORS.nginx(S);if(e)p.push('The nginx config still has an error: '+e+'. Run sudo nginx -t to see it.');
+  const s=S.services.nginx;if(!s.active)p.push('nginx is not running. After fixing the config, run sudo systemctl restart nginx.');
+  if(s.enabled===false)p.push('nginx is disabled, so it will not start after a reboot. Run sudo systemctl enable nginx.');
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Ubuntu server): restored a failed nginx web service by diagnosing with systemctl status and journalctl, validating config with nginx -t, correcting a directive typo, and verifying service health with curl.',
+ learned:`<p><b>systemctl status</b> tells you if a service is running and shows its last log lines. <b>journalctl -u NAME</b> shows the full log for that service.</p><p>Many daemons have a config test. For nginx it is <b>nginx -t</b>. Run it before every restart so a typo never takes a site down.</p><p>Workflow to remember: status, logs, test, fix, test again, restart, verify.</p><p>Always keep a copy before editing (<code>sudo cp file file.bak</code>) so you can roll back.</p>`,
+ solve:['systemctl status nginx','journalctl -u nginx','sudo nginx -t',{edit:'sudo edit /etc/nginx/sites-enabled/portal.conf',find:'server_nme',replace:'server_name'},'sudo nginx -t','sudo systemctl restart nginx','curl http://localhost']});
+/* ---------- Lab 6: network ---------- */
+LABS.push({id:6,tid:'WFC-1046',cat:'hd',pri:'P2',title:'EHR and lab portal unreachable',summary:'The check-in kiosk cannot reach internal sites, but Google works.',host:'wfc-kiosk01',
+ requester:'Jenna Lopez, Front Desk',
+ setup(){const S=baseState(this.host);S.net.myip='10.0.0.61';
+  mkf(S,'/etc/hosts','127.0.0.1   localhost\n127.0.1.1   wfc-kiosk01\n\n# added during EHR migration test, remove after cutover\n10.0.0.99   ehr.westside.local\n');
+  mkf(S,'/etc/resolv.conf','# Generated by NetworkManager\nnameserver 8.8.8.8\nsearch westside.local\n');
+  mkf(S,'/home/ricardo/network-info.txt','Westside Family Clinic network notes\n  Gateway:      10.0.0.1\n  Clinic DNS:   10.0.0.2 (dc01.westside.local), required for all clinic machines\n  EHR server:   ehr.westside.local  (new server since Sep 20)\n  Lab results:  labs.westside.local\n',{o:'ricardo'});return S;},
+ brief:`<p><b>Ticket WFC-1046</b> from Jenna Lopez (Front Desk), priority P2.</p><p>"The check-in kiosk can't open the EHR. It just spins. The lab results site says server not found. But Google works, so the internet is fine?"</p>
+<p>Goal on the kiosk <code>wfc-kiosk01</code>:</p><ul><li><code>ehr.westside.local</code> must reach the new EHR server, and <code>curl http://ehr.westside.local</code> must load the sign-in page</li><li><code>labs.westside.local</code> must resolve and load</li><li>Internet names like google.com must keep working</li></ul><p class="muted">Network notes are in <code>~/network-info.txt</code>.</p>`,
+ hints:['Reproduce it: <code>ping ehr.westside.local</code>, <code>curl http://labs.westside.local</code>, <code>ping google.com</code>. Note which IP ping shows for the EHR.',
+  'Compare with DNS: <code>nslookup ehr.westside.local 10.0.0.2</code>. nslookup skips <code>/etc/hosts</code>, but ping and curl read it first. Look at <code>cat /etc/hosts</code>.',
+  'Two problems: a stale test line in <code>/etc/hosts</code>, and <code>/etc/resolv.conf</code> uses a public DNS server that knows nothing about westside.local. Check <code>cat /etc/resolv.conf</code> and <code>cat ~/network-info.txt</code>.',
+  'Run <code>sudo edit /etc/hosts</code> and delete the 10.0.0.99 line. Then <code>sudo edit /etc/resolv.conf</code> and change the nameserver to <code>10.0.0.2</code>. Verify with ping and curl.'],
+ check(S){const p=[];const hm=parseHosts(S);
+  if(hm.localhost!=='127.0.0.1')p.push('The localhost line was removed from /etc/hosts. Put back: 127.0.0.1   localhost');
+  if(hm['ehr.westside.local']&&hm['ehr.westside.local']!=='10.0.0.25')p.push('/etc/hosts still sends ehr.westside.local to '+hm['ehr.westside.local']+' (the old test server). Remove that line.');
+  const r=resolveHost(S,'ehr.westside.local');if(r.ip!=='10.0.0.25'&&!(hm['ehr.westside.local']&&hm['ehr.westside.local']!=='10.0.0.25'))p.push('ehr.westside.local does not resolve to the EHR server (10.0.0.25) yet. Check the nameserver in /etc/resolv.conf.');
+  const l=resolveHost(S,'labs.westside.local');if(l.ip!=='10.0.0.30')p.push('labs.westside.local does not resolve: /etc/resolv.conf is using '+(nameservers(S).join(', ')||'no nameserver')+'. Clinic machines must use the clinic DNS server 10.0.0.2.');
+  if(!resolveHost(S,'google.com').ip)p.push('Internet names like google.com no longer resolve. Keep a working nameserver (10.0.0.2 also forwards internet names).');
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Linux kiosk): troubleshot internal site outages with ping, nslookup and curl, identified a stale /etc/hosts override and a misconfigured DNS resolver, and restored name resolution for clinic systems.',
+ learned:`<p>Name resolution order on Linux: <b>/etc/hosts first</b>, then the DNS servers in <b>/etc/resolv.conf</b>. A forgotten hosts entry silently overrides DNS.</p><p><b>nslookup</b> and <b>dig</b> query DNS directly and ignore /etc/hosts. When nslookup gives the right IP but ping does not, check /etc/hosts.</p><p>Public DNS (8.8.8.8) cannot answer for private names like westside.local. That is why "Google works" did not prove the network was fine.</p><p>Troubleshoot in layers: can I reach an IP (ping), does the name resolve (nslookup), does the app answer (curl)?</p>`,
+ solve:['ping ehr.westside.local','curl http://labs.westside.local','nslookup ehr.westside.local 10.0.0.2','cat /etc/hosts','cat /etc/resolv.conf',{edit:'sudo edit /etc/hosts',find:'10.0.0.99   ehr.westside.local\n',replace:''},{edit:'sudo edit /etc/resolv.conf',find:'nameserver 8.8.8.8',replace:'nameserver 10.0.0.2'},'ping -c 2 ehr.westside.local','curl http://ehr.westside.local','curl -I http://labs.westside.local']});
+/* ---------- Lab 7: SOC brute force ---------- */
+LABS.push({id:7,tid:'WFC-SOC-2071',cat:'soc',pri:'P1',title:'SSH brute-force alert',summary:'SIEM alert: many failed SSH logins on the remote access server.',host:'wfc-vpn01',
+ requester:'SIEM alert, Tier 1 queue',answer:true,
+ setup(){const S=baseState(this.host);S.groups.clinicians=1105;addUser(S,'drsmith',1003,{gecos:'Dr. Karen Smith',groups:['clinicians']});addUser(S,'jlopez',1001,{gecos:'Jenna Lopez'});
+  const L=[];const A=(t,pid,m)=>L.push(authLine(S,t,pid,m));const h=this.host;
+  A('06:10:44',1210,'Accepted publickey for ricardo from 10.0.0.60 port 50122 ssh2: ED25519 SHA256:q1w2e3');
+  L.push('Sep 27 06:17:01 '+h+' CRON[1260]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)');
+  [['admin',51234],['admin',51240],['root',51302],['root',51311],['oracle',51388],['test',51420]].forEach((x,i)=>{const inv=x[0]!=='root';if(inv)A('06:55:'+String(10+i*7),1400+i,'Invalid user '+x[0]+' from 198.51.100.7 port '+x[1]);A('06:55:'+String(12+i*7),1400+i,'Failed password for '+(inv?'invalid user ':'')+x[0]+' from 198.51.100.7 port '+x[1]+' ssh2');});
+  A('06:55:58',1407,'Connection closed by 198.51.100.7 port 51420 [preauth]');
+  A('07:30:02',1510,'Failed password for jlopez from 10.0.0.51 port 50991 ssh2');A('07:30:19',1511,'Accepted password for jlopez from 10.0.0.51 port 50993 ssh2');
+  A('07:30:19',1511,'pam_unix(sshd:session): session opened for user jlopez(uid=1001) by (uid=0)');
+  A('08:11:48',2000,'Failed password for root from 203.0.113.45 port 40001 ssh2');A('08:11:55',2001,'Failed password for root from 203.0.113.45 port 40003 ssh2');
+  for(let i=0;i<38;i++){const s=12*60+1+i*7;const t='08:'+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');A(t,2010+i,'Failed password for drsmith from 203.0.113.45 port '+(40010+i*3)+' ssh2');if(i%6===5)A(t,2010+i,'Disconnecting authenticating user drsmith 203.0.113.45 port '+(40010+i*3)+': Too many authentication failures [preauth]');}
+  A('08:16:52',2060,'Accepted password for drsmith from 203.0.113.45 port 40122 ssh2');A('08:16:52',2060,'pam_unix(sshd:session): session opened for user drsmith(uid=1003) by (uid=0)');
+  L.push('Sep 27 08:19:30 '+h+' sudo:  drsmith : user NOT in sudoers ; TTY=pts/1 ; PWD=/home/drsmith ; USER=root ; COMMAND=/usr/bin/cat /etc/shadow');
+  A('08:24:10',2060,'pam_unix(sshd:session): session closed for user drsmith');
+  A('09:02:31',2101,'Accepted password for drsmith from 10.0.0.72 port 51800 ssh2');
+  S.fs['/var/log/auth.log'].c=L.join('\n')+'\n';
+  mkf(S,'/home/ricardo/alert-SOC-2071.txt','SIEM ALERT SOC-2071  severity: HIGH\nRule:    SSH brute force (more than 20 failed logins from one source in 5 minutes)\nHost:    wfc-vpn01 (internet facing SSH)\nWindow:  2026-09-27 08:10 to 08:20 CDT\nAction:  Tier 1, review /var/log/auth.log and fill in the incident form.\n',{o:'ricardo'});return S;},
+ brief:`<p><b>Alert WFC-SOC-2071</b>, severity HIGH.</p><p>The SIEM fired "SSH brute force" on <code>wfc-vpn01</code>, the clinic's internet-facing SSH server, between 08:10 and 08:20. As Tier 1 SOC analyst you must triage it from the logs.</p>
