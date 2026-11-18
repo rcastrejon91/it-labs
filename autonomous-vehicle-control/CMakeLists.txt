@@ -6,3 +6,7 @@ enable_testing()
 add_executable(control_tests controller.cpp tests/control_tests.cpp)
 add_test(NAME control_unit_tests COMMAND control_tests)
 add_executable(scenario_runner controller.cpp tests/scenario_runner.cpp)
+
+# Native shared controller for the CARLA Python client (ctypes ABI).
+add_library(av_controller SHARED controller.cpp)
+set_target_properties(av_controller PROPERTIES OUTPUT_NAME av_controller)
