@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.16)
+project(AVControlLab LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+enable_testing()
+add_executable(control_tests controller.cpp tests/control_tests.cpp)
+add_test(NAME control_unit_tests COMMAND control_tests)
+add_executable(scenario_runner controller.cpp tests/scenario_runner.cpp)
