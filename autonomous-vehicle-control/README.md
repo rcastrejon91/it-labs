@@ -1,27 +1,29 @@
-# Autonomous Vehicle Control Lab
+# Autonomous Vehicle Control Validation Lab (C++17)
 
-An educational **C++17 longitudinal autonomous-vehicle control prototype** with an interactive browser visualization. Designed as a portfolio demonstration of robotics control concepts.
+Educational portfolio project implementing a longitudinal controller in **C++17** with unit tests, deterministic scenario simulations, KPI telemetry exports, an incident-analysis template, and a *proposed* on-vehicle validation plan.
 
-## Explore
-- [Interactive demo source](./index.html) — open locally in any browser (GitHub Pages hosting is not configured here)
-- [C++ controller and five executable checks](./main.cpp)
+## Deliverables mapped to requirements
 
-## Features
-- Adaptive cruise / following-gap regulation
-- Time-to-collision emergency braking
-- Acceleration clamp (−6 to +2 m/s²)
-- Jerk-limited normal acceleration changes (3 m/s³)
-- Fail-safe braking for invalid input or timestep
+| Responsibility | Artifact | Status |
+|---|---|---|
+| Control subsystem KPIs | `tests/scenario_runner.cpp` generates CSV: speed, lead gap, acceleration, jerk, TTC, emergency intervention, collision | Implemented; run locally to produce measurements |
+| Develop/test C/C++ control | `controller.cpp` C++17 longitudinal acceleration and emergency braking | Implemented prototype |
+| Unit and simulation tests | `tests/control_tests.cpp`, `tests/scenario_runner.cpp`, CTest | Implemented; scenario outcomes are not independently validated |
+| Coordinate on-vehicle tests | `docs/on_vehicle_validation.md` | Proposed only; **no vehicle testing** |
+| Diagnose issues via May Field Response | `docs/field_response.md` | Illustrative investigation template, not employer's internal procedure |
 
-## Build and test
-```bash
-g++ -std=c++17 -O2 -Wall -Wextra -pedantic main.cpp -o av_control
-./av_control
+## Build and run
+```sh
+cmake -S . -B build
+cmake --build build
+ctest --test-dir build --output-on-failure
+./build/scenario_runner metrics.csv
 ```
 
-The five tests cover smooth acceleration, short-gap deceleration, emergency braking, invalid sensor input, and invalid timestep.
+The scenario runner emits a per-timestep CSV suitable for plotting KPI trends and investigating events.
 
-## Limitations
-The HTML visualization independently mirrors the controller math; it does not run the C++ binary. Slider adjustments are individual snapshots with acceleration history initialized to zero. No full physics engine, vehicle dynamics, or validated collision avoidance is implemented. **Not suitable for deployment on real vehicles or safety-critical systems.**
+## Browser demo
+`index.html` loads `controller.cpp` compiled to WebAssembly via GitHub Actions. It **requires** the Pages build to complete and Pages to be enabled in repository settings. The browser view is a simplified longitudinal simulator, not a vehicle dynamics engine.
 
-Created as a learning/portfolio prototype with AI assistance; it does not represent professional autonomous-vehicle software engineering experience.
+## Safety and scope
+Not production-ready, not safety-certified, not state-of-the-art by demonstrated benchmark, and not integrated with any real vehicle. The current prototype does not implement lateral steering, perception, planning, or actual on-vehicle testing. Emergency braking uses simplified TTC logic and does not guarantee collision avoidance. This project was built with AI assistance.
