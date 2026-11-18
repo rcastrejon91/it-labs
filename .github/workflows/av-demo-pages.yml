@@ -1,0 +1,45 @@
+name: Build C++ WebAssembly demo and deploy Pages
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'autonomous-vehicle-control/**'
+      - '.github/workflows/av-demo-pages.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: mymindstorm/setup-emsdk@v14
+      - name: Compile C++ controller to WebAssembly
+        run: |
+          emcc autonomous-vehicle-control/controller.cpp -O2 -std=c++17 \
+            -s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME=createAVController \
+            -s EXPORTED_FUNCTIONS='["_av_accel","_av_reset"]' \
+            -s EXPORTED_RUNTIME_METHODS='[]' \
+            -o autonomous-vehicle-control/controller.js
+      - name: Assemble static Pages site
+        run: |
+          mkdir -p public/autonomous-vehicle-control
+          cp autonomous-vehicle-control/index.html autonomous-vehicle-control/controller.js autonomous-vehicle-control/controller.wasm public/autonomous-vehicle-control/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
