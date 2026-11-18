@@ -1,20 +1,42 @@
-name: Build C++ WebAssembly demo and deploy Pages
+name: AV C++17 CI and WebAssembly Pages
 on:
   push:
     branches: [main]
     paths:
       - 'autonomous-vehicle-control/**'
       - '.github/workflows/av-demo-pages.yml'
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
-  group: pages
-  cancel-in-progress: true
+  group: av-pages
+  cancel-in-progress: false
 jobs:
-  build:
+  cpp-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile C++17 with strict warnings
+        run: |
+          mkdir -p build
+          g++ -std=c++17 -O2 -Wall -Wextra -Werror autonomous-vehicle-control/controller.cpp autonomous-vehicle-control/tests/control_tests.cpp -o build/control_tests
+          g++ -std=c++17 -O2 -Wall -Wextra -Werror autonomous-vehicle-control/controller.cpp autonomous-vehicle-control/tests/scenario_runner.cpp -o build/scenario_runner
+      - name: Run unit tests and simulation scenarios
+        run: |
+          ./build/control_tests
+          ./build/scenario_runner build/metrics.csv
+          test -s build/metrics.csv
+      - uses: actions/upload-artifact@v4
+        with:
+          name: av-kpi-telemetry
+          path: build/metrics.csv
+  build-web:
+    if: github.event_name != 'pull_request'
+    needs: cpp-tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,9 +46,8 @@ jobs:
           emcc autonomous-vehicle-control/controller.cpp -O2 -std=c++17 \
             -s WASM=1 -s MODULARIZE=1 -s EXPORT_NAME=createAVController \
             -s EXPORTED_FUNCTIONS='["_av_accel","_av_reset"]' \
-            -s EXPORTED_RUNTIME_METHODS='[]' \
             -o autonomous-vehicle-control/controller.js
-      - name: Assemble static Pages site
+      - name: Assemble Pages artifact
         run: |
           mkdir -p public/autonomous-vehicle-control
           cp autonomous-vehicle-control/index.html autonomous-vehicle-control/controller.js autonomous-vehicle-control/controller.wasm public/autonomous-vehicle-control/
@@ -35,11 +56,12 @@ jobs:
         with:
           path: public
   deploy:
+    if: github.event_name != 'pull_request'
+    needs: build-web
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
